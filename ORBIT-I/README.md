@@ -223,7 +223,7 @@ streamlit run app.py
 | Name | Role | Contributions |
 |------|------|---------------|
 | **Musawir Hassan** | Project Lead | Project Architecture, Backend Development, AI Integration |
-| | | |
+| **Mahnoor**| Backend Developer Intern| Python|
 | | | |
 
 > Add your name and contributions before your first commit.
