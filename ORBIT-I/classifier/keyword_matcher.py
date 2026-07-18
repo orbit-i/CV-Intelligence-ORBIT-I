@@ -3,15 +3,21 @@ import os
 
 
 def load_domains():
-    """
-    Load domain keywords from domains.json
-    """
-
-    current_dir = os.path.dirname(__file__)
-    json_path = os.path.join(current_dir, "..", "data", "domains.json")
-
-    with open(json_path, "r", encoding="utf-8") as file:
-        return json.load(file)
+    import sqlite3
+    db_path = r"C:\Users\Admin\Desktop\orbit-I\orbit-I\data\orbit.db"
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT domain_name, keywords FROM domains")
+    rows = cursor.fetchall()
+    conn.close()
+    domains = {}
+    for domain_name, keywords_str in rows:
+        if keywords_str:
+            keywords = [k.strip() for k in keywords_str.split(",")]
+        else:
+            keywords = []
+        domains[domain_name] = keywords
+    return domains
 
 
 def keyword_match(tokens):
