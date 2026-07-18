@@ -1,12 +1,11 @@
-import streamlit as st
-import base64
-import time
 import sys
+sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
+
+import streamlit as st
+import time
 import os
 import pdfplumber
 import docx
-
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from classifier.domain_classifier import classify_resume
 
@@ -58,7 +57,6 @@ if uploaded_file is not None:
 
     with st.spinner("Processing your CV, please wait..."):
 
-        # Step 1: Text extract karo
         extracted_text = ""
 
         if uploaded_file.name.endswith(".pdf"):
@@ -83,7 +81,7 @@ if uploaded_file is not None:
                     for cell in row.cells:
                         extracted_text += cell.text + "\n"
 
-        # Step 2: Classifier chalao
+        result = None
         if extracted_text.strip():
             result = classify_resume(extracted_text)
 
@@ -99,17 +97,16 @@ if uploaded_file is not None:
 
     st.divider()
 
-    # Step 3: Result dikhao
-    if extracted_text.strip() and 'result' in locals():
+    if result:
         st.subheader("🎯 Classification Result")
 
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.metric("Domain", result.get("domain", "Unknown"))
+            st.metric("Domain", result.get("predicted_domain", "Unknown"))
 
         with col2:
-            score = result.get("confidence_score", 0)
+            score = result.get("confidence", 0)
             st.metric("Confidence Score", f"{score}%")
 
         with col3:
