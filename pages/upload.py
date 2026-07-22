@@ -7,6 +7,38 @@ import os
 import pdfplumber
 import docx
 
+import re
+
+def extract_candidate_name(text):
+    """Extract candidate name from CV text using regex patterns."""
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    
+    # Skip common CV header words
+    skip_words = ['resume', 'cv', 'curriculum', 'vitae', 'objective', 
+                  'summary', 'profile', 'contact', 'email', 'phone',
+                  'address', 'linkedin', 'github', 'dear', 'sir', 'madam']
+    
+    for line in lines[:10]:  # Check first 10 lines only
+        # Skip lines with emails, phones, URLs
+        if any(char in line for char in ['@', 'http', 'www', '+92', '0300', '/']):
+            continue
+        # Skip lines with common header words
+        if any(word in line.lower() for word in skip_words):
+            continue
+        # Skip lines that are too long (not a name)
+        if len(line) > 50:
+            continue
+        # Skip lines with special characters
+        if any(char in line for char in ['|', '•', '·', '─', '=']):
+            continue
+        # Name should have 2-4 words, all starting with capital
+        words = line.split()
+        if 2 <= len(words) <= 4:
+            if all(word[0].isupper() for word in words if word.isalpha()):
+                return line
+    
+    return "Candidate"
+
 from classifier.domain_classifier import classify_resume
 from core.offer_generator import generate_offer
 from services.audit_logger import log_event
