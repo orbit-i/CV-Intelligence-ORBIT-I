@@ -145,7 +145,15 @@ if uploaded_file is not None:
                 candidate_profile = {
                     "candidate_name": candidate_name,
                     "domain": domain,
-                    "position_title": domain.replace('Engineering', 'Engineer').replace('Science', 'Scientist').replace('Design', 'Designer').replace('Analysis', 'Analyst').replace('Development', 'Developer'),
+                   position_mapping = {
+    "Software Engineering": "Software Engineer",
+    "Data Science": "Data Scientist",
+    "UI Design": "UI Designer",
+    "Business Analysis": "Business Analyst",
+    "Web Development": "Web Developer",
+}
+
+position_title = position_mapping.get(domain, domain),
                     "salary": "PKR 100,000 / month",
                     "company_name": "ORBIT-I",
                     "hr_signatory": "HR Department",
