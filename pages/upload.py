@@ -136,7 +136,7 @@ if uploaded_file is not None:
                 candidate_profile = {
                     "candidate_name": candidate_name,
                     "domain": domain,
-                    "position_title": domain,
+                    "position_title": domain.replace('Engineering', 'Engineer').replace('Science', 'Scientist').replace('Design', 'Designer').replace('Analysis', 'Analyst').replace('Development', 'Developer'),
                     "salary": "PKR 100,000 / month",
                     "company_name": "ORBIT-I",
                     "hr_signatory": "HR Department",
