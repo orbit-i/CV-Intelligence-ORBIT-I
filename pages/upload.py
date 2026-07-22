@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
+sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")  # TODO: remove/adjust for other machines/deployment
 
 import streamlit as st
 import time
@@ -38,6 +38,29 @@ def extract_candidate_name(text):
     return "Candidate"
 
 
+def get_position_title(domain):
+    """
+    Map a classifier domain to a human-readable job title.
+    Extend this dict with ALL domain labels your classifier can actually output
+    (check classifier/domain_classifier.py for the exact label strings).
+    The fallback below no longer just returns the raw domain name, so
+    domain and position won't look identical even for unmapped domains.
+    """
+    position_mapping = {
+        "Engineering": "Engineer",
+        "Science": "Scientist",
+        "Design": "Designer",
+        "Analysis": "Analyst",
+        # 👉 add every other domain label your classifier returns here, e.g.:
+        # "Marketing": "Marketing Specialist",
+        # "Finance": "Financial Analyst",
+        # "Sales": "Sales Executive",
+        # "HR": "HR Executive",
+        # "IT": "IT Specialist",
+    }
+    return position_mapping.get(domain, f"{domain} Specialist")
+
+
 st.set_page_config(page_title="ORBIT-I | Upload", page_icon="📂", layout="wide")
 
 with open("assets/style.css") as f:
@@ -58,6 +81,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+    <style>
+        [data-testid="stMetricValue"] {
+            font-size: 16px !important;
+        }
+        [data-testid="stMetricLabel"] {
+            font-size: 12px !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 if "total_uploaded" not in st.session_state:
     st.session_state.total_uploaded = 0
 
@@ -69,16 +103,7 @@ if "processed" not in st.session_state:
 
 if "last_uploaded" not in st.session_state:
     st.session_state.last_uploaded = None
-st.markdown("""
-    <style>
-        [data-testid="stMetricValue"] {
-            font-size: 16px !important;
-        }
-        [data-testid="stMetricLabel"] {
-            font-size: 12px !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
+
 st.title("📂 Upload Resume")
 st.write("Upload your resume in PDF or DOCX format")
 
@@ -126,6 +151,9 @@ if uploaded_file is not None:
         # Step 3: Classify domain
         result = None
         offer_result = None
+        domain = "Unknown"
+        confidence = 0
+        status = "Manual Review"
 
         if extracted_text.strip():
             result = classify_resume(extracted_text)
@@ -140,50 +168,21 @@ if uploaded_file is not None:
             confidence = result.get("confidence", 0)
             status = result.get("status", "Manual Review")
 
-            # Step 4: Generate offer letter if score >= 75
+            # Step 4: Generate offer letter if confidence score >= 75
             if confidence >= 75:
+                position_title = get_position_title(domain)
+
                 candidate_profile = {
                     "candidate_name": candidate_name,
                     "domain": domain,
-                   # Step 4: Generate offer letter if confidence score >= 75
-if confidence >= 75:
-
-    # Convert domain name into a proper job position title
-    position_mapping = {
-        "Engineering": "Engineer",
-        "Science": "Scientist",
-        "Design": "Designer",
-        "Analysis": "Analyst"
-    }
-
-    position_title = position_mapping.get(domain, domain)
-
-    candidate_profile = {
-        "candidate_name": candidate_name,
-        "domain": domain,
-        "position_title": position_title,
-        "salary": "PKR 100,000 / month",
-        "company_name": "ORBIT-I",
-        "hr_signatory": "HR Department",
-        "probation_period": "3 months",
-        "location": "Hybrid - Karachi, Pakistan"
-    }
-
-    offer_result = generate_offer(candidate_profile)
-
-
-# Step 5: Log to audit
-log_event(
-    cv_filename=uploaded_file.name,
-    domain_assigned=domain,
-    confidence_score=confidence
-)
+                    "position_title": position_title,
                     "salary": "PKR 100,000 / month",
                     "company_name": "ORBIT-I",
                     "hr_signatory": "HR Department",
                     "probation_period": "3 months",
-                    "location": "Hybrid - Karachi, Pakistan",
+                    "location": "Hybrid - Karachi, Pakistan"
                 }
+
                 offer_result = generate_offer(candidate_profile)
 
             # Step 5: Log to audit
@@ -211,14 +210,12 @@ log_event(
             st.metric("Candidate", candidate_name)
 
         with col2:
-            st.metric("Domain", result.get("predicted_domain", "Unknown"))
+            st.metric("Domain", domain)
 
         with col3:
-            score = result.get("confidence", 0)
-            st.metric("Confidence Score", f"{score}%")
+            st.metric("Confidence Score", f"{confidence}%")
 
         with col4:
-            status = result.get("status", "Unknown")
             if status == "Manual Review":
                 st.metric("Status", "⚠️ Manual Review")
             else:
