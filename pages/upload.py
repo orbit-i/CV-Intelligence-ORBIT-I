@@ -8,6 +8,8 @@ import pdfplumber
 import docx
 
 from classifier.domain_classifier import classify_resume
+from core.offer_generator import generate_offer
+from services.audit_logger import log_event
 
 st.set_page_config(page_title="ORBIT-I | Upload", page_icon="📂", layout="wide")
 
@@ -46,6 +48,12 @@ st.write("Upload your resume in PDF or DOCX format")
 
 st.divider()
 
+# Candidate name input
+candidate_name = st.text_input("Candidate Name (for offer letter)", placeholder="e.g. Ali Khan")
+salary = st.text_input("Salary (for offer letter)", placeholder="e.g. PKR 100,000 / month", value="PKR 100,000 / month")
+
+st.divider()
+
 uploaded_file = st.file_uploader("Select your CV", type=["pdf", "docx"])
 
 if uploaded_file is not None:
@@ -57,6 +65,7 @@ if uploaded_file is not None:
 
     with st.spinner("Processing your CV, please wait..."):
 
+        # Step 1: Text extract
         extracted_text = ""
 
         if uploaded_file.name.endswith(".pdf"):
@@ -81,7 +90,10 @@ if uploaded_file is not None:
                     for cell in row.cells:
                         extracted_text += cell.text + "\n"
 
+        # Step 2: Classify
         result = None
+        offer_result = None
+
         if extracted_text.strip():
             result = classify_resume(extracted_text)
 
@@ -90,6 +102,34 @@ if uploaded_file is not None:
                 st.session_state.processed += 1
                 if st.session_state.pending > 0:
                     st.session_state.pending -= 1
+
+            domain = result.get("predicted_domain", "Unknown")
+            confidence = result.get("confidence", 0)
+            status = result.get("status", "Manual Review")
+
+            # Step 3: Generate offer letter if score >= 75
+            if confidence >= 75:
+                candidate_profile = {
+                    "candidate_name": candidate_name or "Candidate",
+                    "domain": domain,
+                    "position_title": domain,
+                    "salary": salary,
+                    "company_name": "ORBIT-I",
+                    "hr_signatory": "HR Department",
+                    "probation_period": "3 months",
+                    "location": "Hybrid - Karachi, Pakistan",
+                }
+                offer_result = generate_offer(candidate_profile)
+
+            # Step 4: Log to audit
+            log_event(
+                cv_filename=uploaded_file.name,
+                domain_assigned=domain,
+                confidence_score=confidence,
+                offer_status="Generated" if offer_result and offer_result.get("success") else "Flagged for Review",
+                edited_by="System",
+                notes=f"Confidence: {confidence}%"
+            )
 
         time.sleep(1)
 
@@ -116,8 +156,27 @@ if uploaded_file is not None:
             else:
                 st.metric("Status", "✅ Auto Classified")
 
+        st.divider()
+
+        # Step 5: Show result based on status
         if status == "Manual Review":
             st.warning("⚠️ Confidence score is below 75%. This CV has been flagged for manual review.")
+            if st.button("✏️ Go to Manual Override"):
+                st.switch_page("pages/manual_override.py")
+
+        else:
+            if offer_result and offer_result.get("success"):
+                st.success(f"✅ Offer letter generated successfully!")
+                offer_path = offer_result.get("offer_letter", "")
+                with open(offer_path, "rb") as f:
+                    st.download_button(
+                        label="📥 Download Offer Letter",
+                        data=f,
+                        file_name=os.path.basename(offer_path),
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+            elif offer_result and offer_result.get("error"):
+                st.error(f"❌ Offer generation failed: {offer_result.get('error')}")
 
     st.divider()
 
