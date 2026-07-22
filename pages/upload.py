@@ -69,7 +69,16 @@ if "processed" not in st.session_state:
 
 if "last_uploaded" not in st.session_state:
     st.session_state.last_uploaded = None
-
+st.markdown("""
+    <style>
+        [data-testid="stMetricValue"] {
+            font-size: 16px !important;
+        }
+        [data-testid="stMetricLabel"] {
+            font-size: 12px !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
 st.title("📂 Upload Resume")
 st.write("Upload your resume in PDF or DOCX format")
 
