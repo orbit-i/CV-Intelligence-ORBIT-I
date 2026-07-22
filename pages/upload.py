@@ -145,15 +145,39 @@ if uploaded_file is not None:
                 candidate_profile = {
                     "candidate_name": candidate_name,
                     "domain": domain,
-                   position_mapping = {
-    "Software Engineering": "Software Engineer",
-    "Data Science": "Data Scientist",
-    "UI Design": "UI Designer",
-    "Business Analysis": "Business Analyst",
-    "Web Development": "Web Developer",
-}
+                   # Step 4: Generate offer letter if confidence score >= 75
+if confidence >= 75:
 
-position_title = position_mapping.get(domain, domain),
+    # Convert domain name into a proper job position title
+    position_mapping = {
+        "Engineering": "Engineer",
+        "Science": "Scientist",
+        "Design": "Designer",
+        "Analysis": "Analyst"
+    }
+
+    position_title = position_mapping.get(domain, domain)
+
+    candidate_profile = {
+        "candidate_name": candidate_name,
+        "domain": domain,
+        "position_title": position_title,
+        "salary": "PKR 100,000 / month",
+        "company_name": "ORBIT-I",
+        "hr_signatory": "HR Department",
+        "probation_period": "3 months",
+        "location": "Hybrid - Karachi, Pakistan"
+    }
+
+    offer_result = generate_offer(candidate_profile)
+
+
+# Step 5: Log to audit
+log_event(
+    cv_filename=uploaded_file.name,
+    domain_assigned=domain,
+    confidence_score=confidence
+)
                     "salary": "PKR 100,000 / month",
                     "company_name": "ORBIT-I",
                     "hr_signatory": "HR Department",
