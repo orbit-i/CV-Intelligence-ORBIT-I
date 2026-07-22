@@ -4,44 +4,39 @@ sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
 import streamlit as st
 import time
 import os
+import re
 import pdfplumber
 import docx
-
-import re
-
-def extract_candidate_name(text):
-    """Extract candidate name from CV text using regex patterns."""
-    lines = [line.strip() for line in text.split('\n') if line.strip()]
-    
-    # Skip common CV header words
-    skip_words = ['resume', 'cv', 'curriculum', 'vitae', 'objective', 
-                  'summary', 'profile', 'contact', 'email', 'phone',
-                  'address', 'linkedin', 'github', 'dear', 'sir', 'madam']
-    
-    for line in lines[:10]:  # Check first 10 lines only
-        # Skip lines with emails, phones, URLs
-        if any(char in line for char in ['@', 'http', 'www', '+92', '0300', '/']):
-            continue
-        # Skip lines with common header words
-        if any(word in line.lower() for word in skip_words):
-            continue
-        # Skip lines that are too long (not a name)
-        if len(line) > 50:
-            continue
-        # Skip lines with special characters
-        if any(char in line for char in ['|', '•', '·', '─', '=']):
-            continue
-        # Name should have 2-4 words, all starting with capital
-        words = line.split()
-        if 2 <= len(words) <= 4:
-            if all(word[0].isupper() for word in words if word.isalpha()):
-                return line
-    
-    return "Candidate"
 
 from classifier.domain_classifier import classify_resume
 from core.offer_generator import generate_offer
 from services.audit_logger import log_event
+
+
+def extract_candidate_name(text):
+    """Extract candidate name from first few lines of CV text."""
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+
+    skip_words = ['resume', 'cv', 'curriculum', 'vitae', 'objective',
+                  'summary', 'profile', 'contact', 'email', 'phone',
+                  'address', 'linkedin', 'github', 'dear', 'sir', 'madam']
+
+    for line in lines[:10]:
+        if any(char in line for char in ['@', 'http', 'www', '+92', '0300', '/', '📧', '📞', '📍']):
+            continue
+        if any(word in line.lower() for word in skip_words):
+            continue
+        if len(line) > 50:
+            continue
+        if any(char in line for char in ['|', '•', '·', '─', '=', ':', ',']):
+            continue
+        words = line.split()
+        if 2 <= len(words) <= 4:
+            if all(word[0].isupper() for word in words if word.isalpha()):
+                return line
+
+    return "Candidate"
+
 
 st.set_page_config(page_title="ORBIT-I | Upload", page_icon="📂", layout="wide")
 
@@ -77,12 +72,6 @@ if "last_uploaded" not in st.session_state:
 
 st.title("📂 Upload Resume")
 st.write("Upload your resume in PDF or DOCX format")
-
-st.divider()
-
-# Candidate name input
-candidate_name = st.text_input("Candidate Name (for offer letter)", placeholder="e.g. Ali Khan")
-salary = st.text_input("Salary (for offer letter)", placeholder="e.g. PKR 100,000 / month", value="PKR 100,000 / month")
 
 st.divider()
 
@@ -122,7 +111,10 @@ if uploaded_file is not None:
                     for cell in row.cells:
                         extracted_text += cell.text + "\n"
 
-        # Step 2: Classify
+        # Step 2: Extract candidate name
+        candidate_name = extract_candidate_name(extracted_text)
+
+        # Step 3: Classify domain
         result = None
         offer_result = None
 
@@ -139,13 +131,13 @@ if uploaded_file is not None:
             confidence = result.get("confidence", 0)
             status = result.get("status", "Manual Review")
 
-            # Step 3: Generate offer letter if score >= 75
+            # Step 4: Generate offer letter if score >= 75
             if confidence >= 75:
                 candidate_profile = {
-                    "candidate_name": candidate_name or "Candidate",
+                    "candidate_name": candidate_name,
                     "domain": domain,
                     "position_title": domain,
-                    "salary": salary,
+                    "salary": "PKR 100,000 / month",
                     "company_name": "ORBIT-I",
                     "hr_signatory": "HR Department",
                     "probation_period": "3 months",
@@ -153,14 +145,14 @@ if uploaded_file is not None:
                 }
                 offer_result = generate_offer(candidate_profile)
 
-            # Step 4: Log to audit
+            # Step 5: Log to audit
             log_event(
                 cv_filename=uploaded_file.name,
                 domain_assigned=domain,
                 confidence_score=confidence,
                 offer_status="Generated" if offer_result and offer_result.get("success") else "Flagged for Review",
                 edited_by="System",
-                notes=f"Confidence: {confidence}%"
+                notes=f"Confidence: {confidence}% | Candidate: {candidate_name}"
             )
 
         time.sleep(1)
@@ -172,16 +164,19 @@ if uploaded_file is not None:
     if result:
         st.subheader("🎯 Classification Result")
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.metric("Domain", result.get("predicted_domain", "Unknown"))
+            st.metric("Candidate", candidate_name)
 
         with col2:
+            st.metric("Domain", result.get("predicted_domain", "Unknown"))
+
+        with col3:
             score = result.get("confidence", 0)
             st.metric("Confidence Score", f"{score}%")
 
-        with col3:
+        with col4:
             status = result.get("status", "Unknown")
             if status == "Manual Review":
                 st.metric("Status", "⚠️ Manual Review")
@@ -190,7 +185,6 @@ if uploaded_file is not None:
 
         st.divider()
 
-        # Step 5: Show result based on status
         if status == "Manual Review":
             st.warning("⚠️ Confidence score is below 75%. This CV has been flagged for manual review.")
             if st.button("✏️ Go to Manual Override"):
@@ -198,7 +192,7 @@ if uploaded_file is not None:
 
         else:
             if offer_result and offer_result.get("success"):
-                st.success(f"✅ Offer letter generated successfully!")
+                st.success(f"✅ Offer letter generated for {candidate_name}!")
                 offer_path = offer_result.get("offer_letter", "")
                 with open(offer_path, "rb") as f:
                     st.download_button(
