@@ -60,7 +60,7 @@ Regards,
 
 **HR Department**
 
-iCompany Pakistan
+ORBIT-I
     """)
 
     col1, col2 = st.columns(2)
