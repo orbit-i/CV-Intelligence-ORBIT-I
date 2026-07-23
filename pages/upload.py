@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")  # TODO: remove/adjust for other machines/deployment
+sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
 
 import streamlit as st
 import time
@@ -39,26 +39,47 @@ def extract_candidate_name(text):
 
 
 def get_position_title(domain):
-    """
-    Map a classifier domain to a human-readable job title.
-    Extend this dict with ALL domain labels your classifier can actually output
-    (check classifier/domain_classifier.py for the exact label strings).
-    The fallback below no longer just returns the raw domain name, so
-    domain and position won't look identical even for unmapped domains.
-    """
+    """Map domain name to professional position title."""
+    domain_lower = domain.lower()
+
     position_mapping = {
-        "Engineering": "Engineer",
-        "Science": "Scientist",
-        "Design": "Designer",
-        "Analysis": "Analyst",
-        # 👉 add every other domain label your classifier returns here, e.g.:
-        # "Marketing": "Marketing Specialist",
-        # "Finance": "Financial Analyst",
-        # "Sales": "Sales Executive",
-        # "HR": "HR Executive",
-        # "IT": "IT Specialist",
+        "software engineering": "Software Engineer",
+        "software development": "Software Developer",
+        "web development": "Web Developer",
+        "frontend development": "Frontend Developer",
+        "backend development": "Backend Developer",
+        "full stack development": "Full Stack Developer",
+        "mobile development": "Mobile App Developer",
+        "data science": "Data Scientist",
+        "data analysis": "Data Analyst",
+        "data engineering": "Data Engineer",
+        "machine learning": "Machine Learning Engineer",
+        "artificial intelligence": "AI Engineer",
+        "cybersecurity": "Cybersecurity Analyst",
+        "cyber security": "Cybersecurity Analyst",
+        "network security": "Network Security Engineer",
+        "ui/ux design": "UI/UX Designer",
+        "ui ux design": "UI/UX Designer",
+        "graphic design": "Graphic Designer",
+        "product design": "Product Designer",
+        "cloud computing": "Cloud Engineer",
+        "devops": "DevOps Engineer",
+        "business analysis": "Business Analyst",
+        "project management": "Project Manager",
+        "quality assurance": "QA Engineer",
+        "database administration": "Database Administrator",
+        "public health": "Public Health Officer",
+        "finance": "Financial Analyst",
+        "marketing": "Marketing Specialist",
+        "human resources": "HR Executive",
+        "sales": "Sales Executive",
     }
-    return position_mapping.get(domain, f"{domain} Specialist")
+
+    for key, value in position_mapping.items():
+        if key in domain_lower:
+            return value
+
+    return f"{domain} Professional"
 
 
 st.set_page_config(page_title="ORBIT-I | Upload", page_icon="📂", layout="wide")
@@ -78,11 +99,6 @@ st.markdown("""
             padding: 24px 16px 16px 16px;
             letter-spacing: 1px;
         }
-    </style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-    <style>
         [data-testid="stMetricValue"] {
             font-size: 16px !important;
         }
@@ -120,7 +136,6 @@ if uploaded_file is not None:
 
     with st.spinner("Processing your CV, please wait..."):
 
-        # Step 1: Text extract
         extracted_text = ""
 
         if uploaded_file.name.endswith(".pdf"):
@@ -145,10 +160,8 @@ if uploaded_file is not None:
                     for cell in row.cells:
                         extracted_text += cell.text + "\n"
 
-        # Step 2: Extract candidate name
         candidate_name = extract_candidate_name(extracted_text)
 
-        # Step 3: Classify domain
         result = None
         offer_result = None
         domain = "Unknown"
@@ -168,7 +181,6 @@ if uploaded_file is not None:
             confidence = result.get("confidence", 0)
             status = result.get("status", "Manual Review")
 
-            # Step 4: Generate offer letter if confidence score >= 75
             if confidence >= 75:
                 position_title = get_position_title(domain)
 
@@ -185,7 +197,6 @@ if uploaded_file is not None:
 
                 offer_result = generate_offer(candidate_profile)
 
-            # Step 5: Log to audit
             log_event(
                 cv_filename=uploaded_file.name,
                 domain_assigned=domain,
