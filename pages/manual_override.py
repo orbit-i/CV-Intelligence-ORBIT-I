@@ -69,8 +69,36 @@ ORBIT-I
             st.session_state.preview_mode = False
             st.rerun()
     with col2:
-        if st.button("✅ Confirm & Generate Offer"):
-            st.success("✅ Offer letter confirmed and ready for generation!")
+       if st.button("✅ Confirm & Generate Offer"):
+    import sys
+    sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
+    from core.offer_generator import generate_offer
+    
+    candidate_profile = {
+        "candidate_name": data.get("name", "Candidate"),
+        "domain": data.get("domain", ""),
+        "position_title": data.get("position", ""),
+        "salary": data.get("salary", ""),
+        "company_name": "ORBIT-I",
+        "hr_signatory": "HR Department",
+        "probation_period": "3 months",
+        "location": "Hybrid - Karachi, Pakistan",
+    }
+    
+    offer_result = generate_offer(candidate_profile)
+    
+    if offer_result.get("success"):
+        st.success(f"✅ Offer letter generated for {data.get('name')}!")
+        offer_path = offer_result.get("offer_letter", "")
+        with open(offer_path, "rb") as f:
+            st.download_button(
+                label="📥 Download Offer Letter",
+                data=f,
+                file_name=os.path.basename(offer_path),
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+    else:
+        st.error(f"❌ Error: {offer_result.get('error')}")
 
 else:
     st.subheader("📝 Candidate Information")
