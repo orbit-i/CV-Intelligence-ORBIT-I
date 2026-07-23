@@ -81,7 +81,14 @@ def get_position_title(domain):
 
 if uploaded_files:
     st.session_state.results = []
-
+if uploaded_files:
+    st.session_state.results = []
+    if "total_uploaded" not in st.session_state:
+        st.session_state.total_uploaded = 0
+    if "processed" not in st.session_state:
+        st.session_state.processed = 0
+    if "pending" not in st.session_state:
+        st.session_state.pending = 0
     for file in uploaded_files:
         status = st.status(f"Processing {file.name}", expanded=True)
 
@@ -119,7 +126,14 @@ if uploaded_files:
                 "File": file.name,
                 "Domain": predicted_domain,
                 "Confidence (%)": confidence,
-                "Status": "✅ Done" if confidence >= 75 else "⚠️ Manual Review",
+                "Status": "✅ Done" 
+                 if confidence >= 75:
+                st.session_state.total_uploaded += 1
+                st.session_state.processed += 1
+            else:
+                st.session_state.total_uploaded += 1
+                st.session_state.pending += 1
+                if confidence >= 75 else "⚠️ Manual Review",
                 "Offer Path": offer_path or ""
             })
 
