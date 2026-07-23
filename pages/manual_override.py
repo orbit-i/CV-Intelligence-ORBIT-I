@@ -4,9 +4,11 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
 
 from datetime import date, datetime
 from hr.validation import validate_email, validate_salary, validate_required
+from core.offer_generator import generate_offer
 
 st.set_page_config(page_title="ORBIT-I | Manual Override", page_icon="✏️", layout="wide")
 
@@ -64,41 +66,39 @@ ORBIT-I
     """)
 
     col1, col2 = st.columns(2)
+
     with col1:
         if st.button("✏️ Edit Again"):
             st.session_state.preview_mode = False
             st.rerun()
+
     with col2:
-       if st.button("✅ Confirm & Generate Offer"):
-    import sys
-    sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
-    from core.offer_generator import generate_offer
-    
-    candidate_profile = {
-        "candidate_name": data.get("name", "Candidate"),
-        "domain": data.get("domain", ""),
-        "position_title": data.get("position", ""),
-        "salary": data.get("salary", ""),
-        "company_name": "ORBIT-I",
-        "hr_signatory": "HR Department",
-        "probation_period": "3 months",
-        "location": "Hybrid - Karachi, Pakistan",
-    }
-    
-    offer_result = generate_offer(candidate_profile)
-    
-    if offer_result.get("success"):
-        st.success(f"✅ Offer letter generated for {data.get('name')}!")
-        offer_path = offer_result.get("offer_letter", "")
-        with open(offer_path, "rb") as f:
-            st.download_button(
-                label="📥 Download Offer Letter",
-                data=f,
-                file_name=os.path.basename(offer_path),
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-    else:
-        st.error(f"❌ Error: {offer_result.get('error')}")
+        if st.button("✅ Confirm & Generate Offer"):
+            candidate_profile = {
+                "candidate_name": data.get("name", "Candidate"),
+                "domain": data.get("domain", ""),
+                "position_title": data.get("position", ""),
+                "salary": data.get("salary", ""),
+                "company_name": "ORBIT-I",
+                "hr_signatory": "HR Department",
+                "probation_period": "3 months",
+                "location": "Hybrid - Karachi, Pakistan",
+            }
+
+            offer_result = generate_offer(candidate_profile)
+
+            if offer_result.get("success"):
+                st.success(f"✅ Offer letter generated for {data.get('name')}!")
+                offer_path = offer_result.get("offer_letter", "")
+                with open(offer_path, "rb") as f:
+                    st.download_button(
+                        label="📥 Download Offer Letter",
+                        data=f,
+                        file_name=os.path.basename(offer_path),
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+            else:
+                st.error(f"❌ Error: {offer_result.get('error')}")
 
 else:
     st.subheader("📝 Candidate Information")
@@ -114,10 +114,7 @@ else:
     with col2:
         position = st.text_input("Position Title", value=st.session_state.candidate_data.get("position", ""))
         salary = st.text_input("Salary (numbers only)", value=st.session_state.candidate_data.get("salary", ""))
-        joining_date = st.date_input(
-            "Joining Date",
-            value=date.today()
-        )
+        joining_date = st.date_input("Joining Date", value=date.today())
         remarks = st.text_area("Remarks", value=st.session_state.candidate_data.get("remarks", ""))
 
     st.divider()
