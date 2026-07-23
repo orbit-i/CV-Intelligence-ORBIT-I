@@ -175,9 +175,10 @@ if st.session_state.results:
 
     # ZIP download — only 75%+ candidates
     output_folder = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        "data", "output"
-    )
+    r"C:\Users\Admin\Desktop\orbit-I\orbit-I",
+    "data", "output"
+)
+os.makedirs(output_folder, exist_ok=True)
 
     generated_offers = [
         r["Offer Path"] for r in st.session_state.results
