@@ -127,7 +127,7 @@ if uploaded_files:
                 "Domain": predicted_domain,
                 "Confidence (%)": confidence,
                 "Status": "✅ Done" 
-                 if confidence >= 75:
+            if confidence >= 75:
                 st.session_state.total_uploaded += 1
                 st.session_state.processed += 1
             else:
