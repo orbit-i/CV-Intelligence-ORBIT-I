@@ -13,7 +13,6 @@ import pandas as pd
 from classifier.domain_classifier import classify_resume
 from core.offer_generator import generate_offer
 
-
 st.set_page_config(page_title="ORBIT-I | Batch Processing", layout="wide")
 
 st.title("📄 Batch Processing Dashboard")
@@ -29,6 +28,12 @@ uploaded_files = st.file_uploader(
 
 if "results" not in st.session_state:
     st.session_state.results = []
+
+output_folder = os.path.join(
+    r"C:\Users\Admin\Desktop\orbit-I\orbit-I",
+    "data", "output"
+)
+os.makedirs(output_folder, exist_ok=True)
 
 
 def extract_text(file):
@@ -90,7 +95,6 @@ if uploaded_files:
             confidence = result.get("confidence", 0)
             candidate_name = extract_name(file.name)
 
-            # Generate offer letter if score >= 75
             offer_path = None
             if confidence >= 75:
                 candidate_profile = {
@@ -147,7 +151,6 @@ if st.session_state.results:
 
     st.divider()
 
-    # Manual review candidates
     manual_review = [r for r in st.session_state.results if "Manual Review" in r["Status"]]
 
     if manual_review:
@@ -157,7 +160,7 @@ if st.session_state.results:
             with col1:
                 st.write(f"**{candidate['Candidate']}** — Domain: {candidate['Domain']} | Score: {candidate['Confidence (%)']}%")
             with col2:
-                if st.button(f"✏️ Manual Override", key=f"override_{candidate['File']}"):
+                if st.button("✏️ Manual Override", key=f"override_{candidate['File']}"):
                     st.session_state.candidate_data = {
                         "name": candidate['Candidate'],
                         "email": "",
@@ -172,13 +175,6 @@ if st.session_state.results:
                     st.switch_page("pages/manual_override.py")
 
     st.divider()
-
-    # ZIP download — only 75%+ candidates
-    output_folder = os.path.join(
-    r"C:\Users\Admin\Desktop\orbit-I\orbit-I",
-    "data", "output"
-)
-os.makedirs(output_folder, exist_ok=True)
 
     generated_offers = [
         r["Offer Path"] for r in st.session_state.results
