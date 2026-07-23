@@ -226,7 +226,7 @@ if uploaded_file is not None:
         if status == "Manual Review":
             st.warning("⚠️ Confidence score is below 75%. This CV has been flagged for manual review.")
             if st.button("✏️ Go to Manual Override"):
-                st.switch_page("orbit-I/ui/manual_override.py")
+                st.switch_page("pages/manual_override.py")
 
         else:
             if offer_result and offer_result.get("success"):
