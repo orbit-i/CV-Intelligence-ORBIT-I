@@ -29,6 +29,15 @@ uploaded_files = st.file_uploader(
 if "results" not in st.session_state:
     st.session_state.results = []
 
+if "total_uploaded" not in st.session_state:
+    st.session_state.total_uploaded = 0
+
+if "processed" not in st.session_state:
+    st.session_state.processed = 0
+
+if "pending" not in st.session_state:
+    st.session_state.pending = 0
+
 output_folder = os.path.join(
     r"C:\Users\Admin\Desktop\orbit-I\orbit-I",
     "data", "output"
@@ -81,14 +90,7 @@ def get_position_title(domain):
 
 if uploaded_files:
     st.session_state.results = []
-if uploaded_files:
-    st.session_state.results = []
-    if "total_uploaded" not in st.session_state:
-        st.session_state.total_uploaded = 0
-    if "processed" not in st.session_state:
-        st.session_state.processed = 0
-    if "pending" not in st.session_state:
-        st.session_state.pending = 0
+
     for file in uploaded_files:
         status = st.status(f"Processing {file.name}", expanded=True)
 
@@ -103,6 +105,7 @@ if uploaded_files:
             candidate_name = extract_name(file.name)
 
             offer_path = None
+
             if confidence >= 75:
                 candidate_profile = {
                     "candidate_name": candidate_name,
@@ -118,22 +121,21 @@ if uploaded_files:
                 if offer_result.get("success"):
                     offer_path = offer_result.get("offer_letter")
                     status.write("✅ Offer letter generated.")
+
+                st.session_state.total_uploaded += 1
+                st.session_state.processed += 1
+
             else:
                 status.write("⚠️ Score below 75% — flagged for manual review.")
+                st.session_state.total_uploaded += 1
+                st.session_state.pending += 1
 
             st.session_state.results.append({
                 "Candidate": candidate_name,
                 "File": file.name,
                 "Domain": predicted_domain,
                 "Confidence (%)": confidence,
-                "Status": "✅ Done" 
-                if confidence >= 75:
-                st.session_state.total_uploaded += 1
-                st.session_state.processed += 1
-                else:
-                st.session_state.total_uploaded += 1
-                st.session_state.pending += 1
-                if confidence >= 75 else "⚠️ Manual Review",
+                "Status": "✅ Done" if confidence >= 75 else "⚠️ Manual Review",
                 "Offer Path": offer_path or ""
             })
 
