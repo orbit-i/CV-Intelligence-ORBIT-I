@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
@@ -58,9 +59,35 @@ def extract_text(file):
     return ""
 
 
-def extract_name(filename):
-    name = filename.replace(".pdf", "").replace(".docx", "").replace("_", " ")
-    return name
+def extract_name(text):
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    skip_words = ['resume', 'cv', 'curriculum', 'vitae', 'objective',
+                  'summary', 'profile', 'contact', 'email', 'phone',
+                  'address', 'linkedin', 'github', 'dear', 'sir', 'madam']
+    for line in lines[:10]:
+        if any(char in line for char in ['@', 'http', 'www', '+92', '0300', '/', '📧', '📞', '📍']):
+            continue
+        if any(word in line.lower() for word in skip_words):
+            continue
+        if len(line) > 50:
+            continue
+        if any(char in line for char in ['|', '•', '·', '─', '=', ':', ',']):
+            continue
+        words = line.split()
+        if 2 <= len(words) <= 4:
+            if all(word[0].isupper() for word in words if word.isalpha()):
+                return line
+    return "Candidate"
+
+
+def extract_email(text):
+    match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', text)
+    return match.group() if match else ""
+
+
+def extract_phone(text):
+    match = re.search(r'(\+92|0)[0-9\-]{9,12}', text)
+    return match.group() if match else ""
 
 
 def get_position_title(domain):
@@ -102,7 +129,9 @@ if uploaded_files:
 
             predicted_domain = result.get("predicted_domain", "Unknown")
             confidence = result.get("confidence", 0)
-            candidate_name = extract_name(file.name)
+            candidate_name = extract_name(text)
+            candidate_email = extract_email(text)
+            candidate_phone = extract_phone(text)
 
             offer_path = None
 
@@ -132,6 +161,8 @@ if uploaded_files:
 
             st.session_state.results.append({
                 "Candidate": candidate_name,
+                "Email": candidate_email,
+                "Phone": candidate_phone,
                 "File": file.name,
                 "Domain": predicted_domain,
                 "Confidence (%)": confidence,
@@ -147,6 +178,8 @@ if uploaded_files:
         except Exception as e:
             st.session_state.results.append({
                 "Candidate": file.name,
+                "Email": "",
+                "Phone": "",
                 "File": file.name,
                 "Domain": "-",
                 "Confidence (%)": "-",
@@ -161,7 +194,7 @@ if st.session_state.results:
     st.subheader("📊 Processing Summary")
 
     display_df = pd.DataFrame(st.session_state.results)[
-        ["Candidate", "Domain", "Confidence (%)", "Status"]
+        ["Candidate", "Email", "Phone", "Domain", "Confidence (%)", "Status"]
     ]
     st.dataframe(display_df, use_container_width=True)
 
@@ -178,13 +211,13 @@ if st.session_state.results:
             with col2:
                 if st.button("✏️ Manual Override", key=f"override_{candidate['File']}"):
                     st.session_state.candidate_data = {
-                        "name": candidate['Candidate'],
-                        "email": "",
-                        "phone": "",
-                        "position": get_position_title(candidate['Domain']),
+                        "name": candidate["Candidate"],
+                        "email": candidate["Email"],
+                        "phone": candidate["Phone"],
+                        "position": get_position_title(candidate["Domain"]),
                         "salary": "100000",
                         "joining_date": "",
-                        "domain": candidate['Domain'],
+                        "domain": candidate["Domain"],
                         "remarks": ""
                     }
                     st.session_state.preview_mode = False
