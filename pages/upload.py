@@ -1,5 +1,7 @@
 import sys
-sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
+import os
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'orbit-I'))
+sys.path.insert(0, BASE_DIR)
 
 import streamlit as st
 import time
