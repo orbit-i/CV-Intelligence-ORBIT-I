@@ -3,10 +3,8 @@ import os
 import re
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-output_folder = os.path.join(
-    r"C:\Users\Admin\Desktop\orbit-I\orbit-I",
-    "data", "output"
-)
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'orbit-I'))
+sys.path.insert(0, BASE_DIR)
 
 import streamlit as st
 import pdfplumber
@@ -42,10 +40,7 @@ if "processed" not in st.session_state:
 if "pending" not in st.session_state:
     st.session_state.pending = 0
 
-output_folder = os.path.join(
-    r"C:\Users\Admin\Desktop\orbit-I\orbit-I",
-    "data", "output"
-)
+output_folder = os.path.join(BASE_DIR, "data", "output")
 os.makedirs(output_folder, exist_ok=True)
 
 
