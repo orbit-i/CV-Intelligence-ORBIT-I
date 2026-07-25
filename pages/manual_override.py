@@ -4,7 +4,8 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'orbit-I'))
+sys.path.insert(0, BASE_DIR)
 
 from datetime import date, datetime
 from hr.validation import validate_email, validate_salary, validate_required
