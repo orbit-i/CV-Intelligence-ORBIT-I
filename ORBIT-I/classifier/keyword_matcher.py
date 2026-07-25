@@ -4,7 +4,7 @@ import os
 
 def load_domains():
     import sqlite3
-    db_path = r"C:\Users\Admin\Desktop\orbit-I\orbit-I\data\orbit.db"
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'orbit.db')
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT domain_name, keywords FROM domains")
