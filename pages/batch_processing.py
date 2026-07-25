@@ -3,7 +3,10 @@ import os
 import re
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, r"C:\Users\Admin\Desktop\orbit-I\orbit-I")
+output_folder = os.path.join(
+    r"C:\Users\Admin\Desktop\orbit-I\orbit-I",
+    "data", "output"
+)
 
 import streamlit as st
 import pdfplumber
