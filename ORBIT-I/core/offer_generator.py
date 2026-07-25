@@ -13,7 +13,7 @@ def replace_in_paragraph(paragraph, replacements):
 def generate_offer(candidate_profile):
     base_dir = Path(__file__).resolve().parent.parent
 
-    template_path = base_dir / "templates" / "offer_template.docx"
+    template_path = Path(__file__).resolve().parent.parent / "templates" / "offer_template.docx"
 
     if not template_path.exists():
         return {"error": f"Template not found at: {template_path}"}
