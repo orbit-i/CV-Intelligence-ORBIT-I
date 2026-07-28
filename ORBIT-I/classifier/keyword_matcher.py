@@ -1,15 +1,18 @@
 import json
 import os
+import sqlite3
 
 
 def load_domains():
-    import sqlite3
-    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'orbit.db')
+    db_path = os.path.normpath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'orbit.db')
+    )
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT domain_name, keywords FROM domains")
     rows = cursor.fetchall()
     conn.close()
+
     domains = {}
     for domain_name, keywords_str in rows:
         if keywords_str:
@@ -23,36 +26,27 @@ def load_domains():
 def keyword_match(tokens):
     """
     Compare resume tokens against every domain.
-
     Returns:
     {
-        domain:{
-            matched:int,
-            total_keywords:int,
-            matched_keywords:[]
+        domain: {
+            matched: int,
+            total_keywords: int,
+            matched_keywords: []
         }
     }
     """
-
     domains = load_domains()
-
     cleaned_text = " ".join(tokens)
-
     results = {}
 
     for domain, keywords in domains.items():
-
         matched_keywords = []
-
         for keyword in keywords:
-
             keyword = keyword.lower()
-
             # Multi-word keyword
             if " " in keyword:
                 if keyword in cleaned_text:
                     matched_keywords.append(keyword)
-
             # Single-word keyword
             else:
                 if keyword in tokens:
@@ -63,5 +57,4 @@ def keyword_match(tokens):
             "total_keywords": len(keywords),
             "matched_keywords": matched_keywords
         }
-
     return results
