@@ -1,25 +1,37 @@
-import base64
 import streamlit as st
 import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'orbit-I'))
+BASE_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "orbit-I")
+)
 sys.path.insert(0, BASE_DIR)
 
-from datetime import date, datetime
-from hr.validation import validate_email, validate_salary, validate_required
-from core.offer_generator import generate_offer
+from datetime import date
+from hr.validation import (
+    validate_email,
+    validate_salary,
+    validate_required,
+)
+from services.offer_service import create_offer
 
-st.set_page_config(page_title="ORBIT-I | Manual Override", page_icon="✏️", layout="wide")
+st.set_page_config(
+    page_title="ORBIT-I | Manual Override",
+    page_icon="✏️",
+    layout="wide",
+)
 
 st.title("✏️ Manual Override Panel")
 st.write("Review and edit candidate information before generating offer letter")
 
 st.divider()
 
+# -----------------------------
+# Session State Initialization
+# -----------------------------
 if "candidate_data" not in st.session_state:
-    st.session_state.candidate_data = {
+    st.session_state["candidate_data"] = {
         "name": "",
         "email": "",
         "phone": "",
@@ -27,18 +39,24 @@ if "candidate_data" not in st.session_state:
         "salary": "",
         "joining_date": "",
         "domain": "",
-        "remarks": ""
+        "remarks": "",
     }
 
 if "preview_mode" not in st.session_state:
-    st.session_state.preview_mode = False
+    st.session_state["preview_mode"] = False
 
-if st.session_state.preview_mode:
+
+# ==========================================================
+# PREVIEW MODE
+# ==========================================================
+if st.session_state["preview_mode"]:
+
+    data = st.session_state["candidate_data"]
+
     st.subheader("📄 Offer Letter Preview")
 
-    data = st.session_state.candidate_data
-
-    st.markdown(f"""
+    st.markdown(
+        f"""
 ---
 **Date:** {data.get('joining_date', '')}
 
@@ -64,17 +82,19 @@ Regards,
 **HR Department**
 
 ORBIT-I
-    """)
+"""
+    )
 
     col1, col2 = st.columns(2)
 
     with col1:
         if st.button("✏️ Edit Again"):
-            st.session_state.preview_mode = False
+            st.session_state["preview_mode"] = False
             st.rerun()
 
     with col2:
         if st.button("✅ Confirm & Generate Offer"):
+
             candidate_profile = {
                 "candidate_name": data.get("name", "Candidate"),
                 "domain": data.get("domain", ""),
@@ -86,57 +106,101 @@ ORBIT-I
                 "location": "Hybrid - Karachi, Pakistan",
             }
 
-            offer_result = generate_offer(candidate_profile)
+            offer_result = create_offer(candidate_profile)
 
             if offer_result.get("success"):
-                st.success(f"✅ Offer letter generated for {data.get('name')}!")
-                offer_path = offer_result.get("offer_letter", "")
-                with open(offer_path, "rb") as f:
-                    st.download_button(
-                        label="📥 Download Offer Letter",
-                        data=f,
-                        file_name=os.path.basename(offer_path),
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    )
-            else:
-                st.error(f"❌ Error: {offer_result.get('error')}")
 
+                st.session_state["candidate_data"] = data
+                st.session_state["offer_letter_path"] = offer_result["offer_letter"]
+
+                st.switch_page("pages/offer_preview.py")
+
+            else:
+                st.error(
+                    offer_result.get(
+                        "error",
+                        "Failed to generate offer letter.",
+                    )
+                )
+
+# ==========================================================
+# EDIT MODE
+# ==========================================================
 else:
+
     st.subheader("📝 Candidate Information")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        name = st.text_input("Full Name", value=st.session_state.candidate_data.get("name", ""))
-        email = st.text_input("Email", value=st.session_state.candidate_data.get("email", ""))
-        phone = st.text_input("Phone", value=st.session_state.candidate_data.get("phone", ""))
-        domain = st.text_input("Domain", value=st.session_state.candidate_data.get("domain", ""))
+        name = st.text_input(
+            "Full Name",
+            value=st.session_state["candidate_data"].get("name", ""),
+        )
+
+        email = st.text_input(
+            "Email",
+            value=st.session_state["candidate_data"].get("email", ""),
+        )
+
+        phone = st.text_input(
+            "Phone",
+            value=st.session_state["candidate_data"].get("phone", ""),
+        )
+
+        domain = st.text_input(
+            "Domain",
+            value=st.session_state["candidate_data"].get("domain", ""),
+        )
 
     with col2:
-        position = st.text_input("Position Title", value=st.session_state.candidate_data.get("position", ""))
-        salary = st.text_input("Salary (numbers only)", value=st.session_state.candidate_data.get("salary", ""))
-        joining_date = st.date_input("Joining Date", value=date.today())
-        remarks = st.text_area("Remarks", value=st.session_state.candidate_data.get("remarks", ""))
+
+        position = st.text_input(
+            "Position Title",
+            value=st.session_state["candidate_data"].get("position", ""),
+        )
+
+        salary = st.text_input(
+            "Salary (numbers only)",
+            value=st.session_state["candidate_data"].get("salary", ""),
+        )
+
+        joining_date = st.date_input(
+            "Joining Date",
+            value=date.today(),
+        )
+
+        remarks = st.text_area(
+            "Remarks",
+            value=st.session_state["candidate_data"].get("remarks", ""),
+        )
 
     st.divider()
 
     if st.button("💾 Save & Preview"):
+
         errors = []
 
         if not validate_required(name):
             errors.append("Name is required")
+
         if not validate_required(position):
             errors.append("Position is required")
+
         if not validate_email(email):
             errors.append("Invalid email address")
+
         if not validate_salary(salary):
             errors.append("Salary must contain numbers only")
 
         if errors:
+
             for error in errors:
                 st.error(f"❌ {error}")
+
         else:
-            st.session_state.candidate_data = {
+
+            st.session_state["candidate_data"] = {
                 "name": name,
                 "email": email,
                 "phone": phone,
@@ -144,7 +208,8 @@ else:
                 "salary": salary,
                 "joining_date": joining_date.isoformat(),
                 "domain": domain,
-                "remarks": remarks
+                "remarks": remarks,
             }
-            st.session_state.preview_mode = True
+
+            st.session_state["preview_mode"] = True
             st.rerun()
