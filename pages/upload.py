@@ -5,13 +5,10 @@ sys.path.insert(0, BASE_DIR)
 
 import streamlit as st
 import time
-import os
-import re
 import pdfplumber
 import docx
 
 from classifier.domain_classifier import classify_resume
-from core.offer_generator import generate_offer
 from services.audit_logger import log_event
 
 
@@ -184,28 +181,33 @@ if uploaded_file is not None:
             status = result.get("status", "Manual Review")
 
             if confidence >= 75:
+                
                 position_title = get_position_title(domain)
 
-                candidate_profile = {
-                    "candidate_name": candidate_name,
+                st.session_state["candidate_data"] = {
+                    "name": candidate_name,
+                    "email": "",
+                    "phone": "",
+                    "position": position_title,
+                    "salary": "100000",
+                    "joining_date": "",
                     "domain": domain,
-                    "position_title": position_title,
-                    "salary": "PKR 100,000 / month",
-                    "company_name": "ORBIT-I",
-                    "hr_signatory": "HR Department",
-                    "probation_period": "3 months",
-                    "location": "Hybrid - Karachi, Pakistan"
+                    "remarks": ""
                 }
 
-                offer_result = generate_offer(candidate_profile)
+                offer_result = {
+                     
+                     "success": True
+                }
 
             log_event(
-                cv_filename=uploaded_file.name,
-                domain_assigned=domain,
-                confidence_score=confidence,
-                offer_status="Generated" if offer_result and offer_result.get("success") else "Flagged for Review",
-                edited_by="System",
-                notes=f"Confidence: {confidence}% | Candidate: {candidate_name}"
+                     
+                     cv_filename=uploaded_file.name,
+                     domain_assigned=domain,
+                     confidence_score=confidence,
+                     offer_status="Generated" if offer_result and offer_result.get("success") else "Flagged for Review",
+                     edited_by="System",
+                     notes=f"Confidence: {confidence}% | Candidate: {candidate_name}"
             )
 
         time.sleep(1)
@@ -243,15 +245,14 @@ if uploaded_file is not None:
 
         else:
             if offer_result and offer_result.get("success"):
-                st.success(f"✅ Offer letter generated for {candidate_name}!")
-                offer_path = offer_result.get("offer_letter", "")
-                with open(offer_path, "rb") as f:
-                    st.download_button(
-                        label="📥 Download Offer Letter",
-                        data=f,
-                        file_name=os.path.basename(offer_path),
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    )
+
+               st.success("✅ Candidate information extracted successfully.")
+
+               if st.button(
+                   "➡ Continue to Manual Override",
+                   use_container_width=True,
+               ):
+                   st.switch_page("pages/manual_override.py")
             elif offer_result and offer_result.get("error"):
                 st.error(f"❌ Offer generation failed: {offer_result.get('error')}")
 
