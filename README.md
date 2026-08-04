@@ -227,9 +227,9 @@ streamlit run app.py
 | | | |
 | **Kashif Lakho** | Python Developer | Backend Development |
 | | | |
-
+| **Abdul Qayoom** | Python Developer | AI Engineering |
+| | | |
 > Add your name and contributions before your first commit.
-
 ---
 
 ## 📜 License
