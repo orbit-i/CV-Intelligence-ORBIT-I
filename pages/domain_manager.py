@@ -276,7 +276,7 @@ with left_col:
         st.markdown("<p style='color:#64748b; font-size:13px;'>Upload and manage offer letter templates.</p>", unsafe_allow_html=True)
 
         st.markdown("**Template File (.DOCX)**")
-        template_file = st.file_uploader("", type=["docx"], label_visibility="collapsed", key="template_upload")
+        template_file = st.file_uploader("Upload Template", type=["docx"], label_visibility="collapsed", key="template_upload")
         st.markdown("<p style='font-size:11px; color:#94a3b8;'>Only .docx files are supported</p>", unsafe_allow_html=True)
 
         st.markdown("**Available Merge Fields**")
@@ -397,10 +397,30 @@ with right_col:
                             doc = Document(test_cv)
                             text = "\n".join([p.text for p in doc.paragraphs])
 
-                        # Classify
-                        from classifier.domain_classifier import classify_resume
-                        result = classify_resume(text)
-                        st.session_state.tester_result = result
+                        # Get score for the domain the user selected
+                        from classifier.preprocess import preprocess_text
+                        from classifier.keyword_matcher import keyword_match
+                        from classifier.confidence_score import calculate_confidence
+
+                        preprocessed = preprocess_text(text)
+                        match_results = keyword_match(preprocessed)
+                        conf_results  = calculate_confidence(match_results)
+
+                        # Find score for selected_domain (case-insensitive)
+                        selected_conf = 0
+                        for d, info in conf_results.items():
+                            if d.lower().strip() == selected_domain.lower().strip():
+                                selected_conf = info["confidence"]
+                                break
+
+                        st.session_state.tester_result = {
+                            "predicted_domain": selected_domain,
+                            "confidence": selected_conf,
+                            "all_scores": {
+                                d: info["confidence"]
+                                for d, info in conf_results.items()
+                            },
+                        }
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
             else:
@@ -408,7 +428,7 @@ with right_col:
 
         if st.session_state.tester_result:
             r = st.session_state.tester_result
-            predicted = r.get("predicted_domain", "Unknown")
+            predicted  = r.get("predicted_domain", "Unknown")
             confidence = r.get("confidence", 0)
             color = "#16a34a" if confidence >= 75 else "#d97706" if confidence >= 50 else "#dc2626"
 
@@ -416,7 +436,7 @@ with right_col:
                 <div style='background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:16px; margin-top:12px;
                     display:flex; justify-content:space-between; align-items:center;'>
                     <div>
-                        <p style='font-size:12px; color:#64748b; margin-bottom:4px;'>Predicted Domain</p>
+                        <p style='font-size:12px; color:#64748b; margin-bottom:4px;'>Selected Domain</p>
                         <p style='font-size:22px; font-weight:800; color:{color}; margin:0;'>{predicted}</p>
                     </div>
                     <div style='text-align:right;'>
@@ -425,5 +445,21 @@ with right_col:
                     </div>
                 </div>
             """, unsafe_allow_html=True)
+
+            # Show all domain scores for full transparency
+            all_scores = r.get("all_scores", {})
+            if all_scores:
+                st.markdown("<p style='font-size:12px; color:#64748b; margin-top:14px; margin-bottom:6px;'>All domain scores:</p>", unsafe_allow_html=True)
+                sorted_scores = sorted(all_scores.items(), key=lambda x: x[1], reverse=True)
+                for d, s in sorted_scores:
+                    bar = "#16a34a" if s >= 75 else "#d97706" if s >= 50 else "#94a3b8"
+                    bold = "font-weight:700;" if d == predicted else ""
+                    st.markdown(
+                        f"<div style='display:flex; justify-content:space-between; padding:3px 0; font-size:13px;'>"
+                        f"<span style='{bold} color:#334155;'>{d}</span>"
+                        f"<span style='color:{bar}; font-weight:600;'>{s}%</span>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
     else:
         st.info("Add domains first to use the Classification Tester.")
