@@ -229,6 +229,8 @@ streamlit run app.py
 | | | |
 | **Abdul Qayoom** | Python Developer | AI Engineering |
 | | | |
+| **Prem Kumar** | Python Developer | AI Engineering |
+| | | |
 > Add your name and contributions before your first commit.
 ---
 
