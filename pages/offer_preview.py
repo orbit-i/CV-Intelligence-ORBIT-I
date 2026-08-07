@@ -1,5 +1,7 @@
 import sys
 import os
+import textwrap
+import base64
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'orbit-I'))
 
@@ -7,6 +9,17 @@ import streamlit as st
 from datetime import datetime
 
 st.set_page_config(page_title="ORBIT-I | Offer Preview", page_icon="📄", layout="wide")
+
+
+def get_logo_base64():
+    logo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "logo.png")
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    return ""
+
+
+logo_base64 = get_logo_base64()
 
 st.markdown("""
 <style>
@@ -83,7 +96,7 @@ st.markdown("""
         align-items: flex-start;
         margin-bottom: 24px;
         padding-bottom: 16px;
-        border-bottom: 2px solid #1a3a6b;
+        border-bottom: 3px solid #2E5AAC;
     }
 
     .letter-footer {
@@ -158,50 +171,53 @@ with left_col:
     joining = data.get("joining_date", "TBD")
     expiry = data.get("joining_date", "TBD")
 
-    st.markdown(f"""
-    <div class="letter-preview">
-        <div class="letter-header">
-            <div>
-                <div style='font-size:22px; font-weight:800; color:#1a3a6b; letter-spacing:-0.5px;'>ORBIT-I</div>
-                <div style='font-size:12px; color:#64748b;'>Building Ideas. Creating Impact.</div>
-            </div>
-            <div style='text-align:right; font-size:12px; color:#64748b;'>
-                <div>Offer No: {offer_number}</div>
-                <div>Date: {today}</div>
-            </div>
-        </div>
+    letter_html = f"""<div class="letter-preview">
+<div class="letter-header">
+<div style="display:flex; align-items:center; gap:14px;">
+<img src="data:image/png;base64,{logo_base64}" style="height:48px;">
+<div>
+<div style='font-size:22px; font-weight:800; color:#1a3a6b; letter-spacing:-0.5px;'>ORBIT-I</div>
+<div style='font-size:12px; color:#64748b;'>Building Ideas, Creating Impacts</div>
+</div>
+</div>
+<div style='text-align:right; font-size:12px; color:#64748b;'>
+<div>Offer No: {offer_number}</div>
+<div>Date: {today}</div>
+</div>
+</div>
 
-        <p>Dear <strong>{candidate_name}</strong>,</p>
+<p>Dear <strong>{candidate_name}</strong>,</p>
 
-        <p>We are pleased to offer you the position of <strong>{position}</strong> at <strong>ORBIT-I</strong>.
-        We were impressed with your qualifications and believe you will be a valuable addition to our team.</p>
+<p>We are pleased to offer you the position of <strong>{position}</strong> at <strong>ORBIT-I</strong>.
+We were impressed with your qualifications and believe you will be a valuable addition to our team.</p>
 
-        <table style='width:100%; margin:20px 0; border-collapse:collapse;'>
-            <tr><td style='padding:6px 0; font-weight:600; width:180px;'>Position:</td><td>{position}</td></tr>
-            <tr><td style='padding:6px 0; font-weight:600;'>Department:</td><td>{domain}</td></tr>
-            <tr><td style='padding:6px 0; font-weight:600;'>Work Location:</td><td>Hybrid — Karachi, Pakistan</td></tr>
-            <tr><td style='padding:6px 0; font-weight:600;'>Employment Type:</td><td>Full Time</td></tr>
-            <tr><td style='padding:6px 0; font-weight:600;'>Start Date:</td><td>{joining}</td></tr>
-        </table>
+<table style='width:100%; margin:20px 0; border-collapse:collapse;'>
+<tr><td style='padding:6px 0; font-weight:600; width:180px;'>Position:</td><td>{position}</td></tr>
+<tr><td style='padding:6px 0; font-weight:600;'>Department:</td><td>{domain}</td></tr>
+<tr><td style='padding:6px 0; font-weight:600;'>Work Location:</td><td>Hybrid — Karachi, Pakistan</td></tr>
+<tr><td style='padding:6px 0; font-weight:600;'>Employment Type:</td><td>Full Time</td></tr>
+<tr><td style='padding:6px 0; font-weight:600;'>Start Date:</td><td>{joining}</td></tr>
+</table>
 
-        <p>Your monthly compensation will be <strong>PKR {salary}</strong>.
-        Details of your compensation and other benefits are outlined in the accompanying terms.</p>
+<p>Your monthly compensation will be <strong>PKR {salary}</strong>.
+Details of your compensation and other benefits are outlined in the accompanying terms.</p>
 
-        <p>Please review this offer letter carefully and confirm your acceptance within <strong>3 working days</strong>
-        of receipt.</p>
+<p>Please review this offer letter carefully and confirm your acceptance within <strong>3 working days</strong>
+of receipt.</p>
 
-        <p>We are excited about the possibility of you joining our team!</p>
+<p>We are excited about the possibility of you joining our team!</p>
 
-        <br>
-        <p>Sincerely,</p>
-        <p><strong>HR Department</strong><br>ORBIT-I Team</p>
+<br>
+<p>Sincerely,</p>
+<p><strong>HR Department</strong><br>ORBIT-I Team</p>
 
-        <div class="letter-footer">
-            <span>✉ orbiti2026@gmail.com</span>
-            <span>📍 Karachi, Sindh, Pakistan</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="letter-footer">
+<span>✉ orbiti2026@gmail.com</span>
+<span>📍 Karachi, Sindh, Pakistan</span>
+</div>
+</div>"""
+
+    st.markdown(letter_html, unsafe_allow_html=True)
 
 # ═══════════════════════════════
 # RIGHT — Summary + Actions
