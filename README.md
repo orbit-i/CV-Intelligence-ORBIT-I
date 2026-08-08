@@ -227,6 +227,8 @@ streamlit run app.py
 | | | |
 | **Kashif Lakho** | Python Developer | Backend Development |
 | | | |
+| **Prem Kumar ** | Python Developer | Ai Engineer |
+| | | |
 
 > Add your name and contributions before your first commit.
 
