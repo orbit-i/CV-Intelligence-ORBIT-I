@@ -217,7 +217,6 @@ streamlit run app.py
 6. Update documentation whenever necessary.
 
 ---
-
 ## 👨‍💻 Team Members
 
 | **Name** | **Role** | **Contributions** |
