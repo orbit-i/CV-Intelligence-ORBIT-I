@@ -1,0 +1,53 @@
+/* Main background */
+.stApp {
+    background-color: #f0f4f8;
+}
+
+/* Title */
+h1 {
+    color: #1a73e8;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Subheader */
+h2, h3 {
+    color: #2c3e50;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Metric cards */
+[data-testid="stMetric"] {
+    background-color: #ffffff;
+    border: 1px solid #d1e3ff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Upload box */
+[data-testid="stFileUploader"] {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 10px;
+    border: 2px dashed #1a73e8;
+}
+
+/* Success message */
+[data-testid="stAlert"] {
+    border-radius: 10px;
+}
+
+/* Button */
+.stButton > button {
+    background-color: #1a73e8;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    padding: 10px 24px;
+    font-size: 16px;
+}
+
+.stButton > button:hover {
+    background-color: #1558b0;
+    color: white;
+}
