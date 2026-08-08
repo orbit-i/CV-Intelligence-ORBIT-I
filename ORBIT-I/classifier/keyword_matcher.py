@@ -1,6 +1,6 @@
-import json
 import os
 import sqlite3
+import re
 
 
 def load_domains():
@@ -16,45 +16,64 @@ def load_domains():
     domains = {}
     for domain_name, keywords_str in rows:
         if keywords_str:
-            keywords = [k.strip() for k in keywords_str.split(",")]
+            keywords = [k.strip().lower() for k in keywords_str.split(",") if k.strip()]
         else:
             keywords = []
         domains[domain_name] = keywords
     return domains
 
 
-def keyword_match(tokens):
+def keyword_match(preprocessed):
     """
-    Compare resume tokens against every domain.
+    Compare resume tokens/text against every domain's keyword list.
+
+    Accepts the dict returned by preprocess_text():
+        { "tokens": [...], "full_text": "..." }
+
     Returns:
     {
         domain: {
             matched: int,
             total_keywords: int,
-            matched_keywords: []
+            matched_keywords: [str, ...]
         }
     }
     """
     domains = load_domains()
-    cleaned_text = " ".join(tokens)
+
+    tokens = preprocessed["tokens"]        # deduplicated word list
+    full_text = preprocessed["full_text"]  # full clean string (no dedup)
+    token_set = set(tokens)
+
     results = {}
 
     for domain, keywords in domains.items():
         matched_keywords = []
+        seen_matches = set()  # avoid double-counting
+
         for keyword in keywords:
-            keyword = keyword.lower()
-            # Multi-word keyword
+            keyword = keyword.lower().strip()
+            if not keyword or keyword in seen_matches:
+                continue
+
             if " " in keyword:
-                if keyword in cleaned_text:
+                # Multi-word: search in the full (non-deduplicated) text
+                # Use word-boundary aware search so "sql" doesn't match "nosql"
+                pattern = r'\b' + re.escape(keyword) + r'\b'
+                if re.search(pattern, full_text):
                     matched_keywords.append(keyword)
-            # Single-word keyword
+                    seen_matches.add(keyword)
             else:
-                if keyword in tokens:
+                # Single-word: exact token match (word boundary guaranteed
+                # since we split on whitespace during preprocessing)
+                if keyword in token_set:
                     matched_keywords.append(keyword)
+                    seen_matches.add(keyword)
 
         results[domain] = {
             "matched": len(matched_keywords),
             "total_keywords": len(keywords),
-            "matched_keywords": matched_keywords
+            "matched_keywords": matched_keywords,
         }
+
     return results

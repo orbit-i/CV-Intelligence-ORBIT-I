@@ -223,18 +223,13 @@ streamlit run app.py
 | Name | Role | Contributions |
 |------|------|---------------|
 | **Musawir Hassan** | Project Lead | Project Architecture, Backend Development, AI Integration |
-| **Mahnoor**| Backend Developer Intern| Python|
-| | | |
+| **Mahnoor** | Backend Developer Intern | Python |
 | **Kashif Lakho** | Python Developer | Backend Development |
-| | | |
 | **Abdul Qayoom** | Python Developer | AI Engineering |
-| | | |
 | **Prem Kumar** | Python Developer | AI Engineering |
-| | | |
-| **Umair** | Python Developer | Data Scientist |
-| | | |
+| **Umair Ahmed Bhutto** | Python Developer / AI Developer | Classifier Improvements, Domain Classification, Confidence Scoring, Preprocessing, Manual Override, Domain Management, Upload Improvements, Testing |
+
 > Add your name and contributions before your first commit.
----
 
 ## 📜 License
 
