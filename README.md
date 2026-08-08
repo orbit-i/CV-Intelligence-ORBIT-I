@@ -220,8 +220,8 @@ streamlit run app.py
 
 ## 👨‍💻 Team Members
 
-| Name | Role | Contributions |
-|------|------|---------------|
+| **Name** | **Role** | **Contributions** |
+|----------|----------|-------------------|
 | **Musawir Hassan** | Project Lead | Project Architecture, Backend Development, AI Integration |
 | **Mahnoor** | Backend Developer Intern | Python |
 | **Kashif Lakho** | Python Developer | Backend Development |
