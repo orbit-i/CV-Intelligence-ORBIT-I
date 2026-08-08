@@ -226,7 +226,7 @@ streamlit run app.py
 | **Mahnoor** | Backend Developer Intern | Python |
 | **Kashif Lakho** | Python Developer | Backend Development |
 | **Abdul Qayoom** | Python Developer | AI Engineering |
-| **Prem Kumar** | Python Developer | AI Engineering |
+| **Prem Kumar** | Python Developer | Batch Processing Module, Multiple Resume Upload, Resume Processing & Classification |
 | **Umair Ahmed Bhutto** | Python Developer / AI Developer | Classifier Improvements, Domain Classification, Confidence Scoring, Preprocessing, Manual Override, Domain Management, Upload Improvements, Testing |
 
 > Add your name and contributions before your first commit.
