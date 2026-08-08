@@ -6,3 +6,4 @@ docxtpl
 pandas
 python-dotenv
 spacy
+pdfplumber

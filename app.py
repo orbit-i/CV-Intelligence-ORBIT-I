@@ -13,4 +13,4 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.switch_page("pages/home.py")
+st.switch_page("pages/0_home.py")

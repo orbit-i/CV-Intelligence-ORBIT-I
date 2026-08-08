@@ -273,4 +273,4 @@ if uploaded_file is not None:
 
     st.divider()
     if st.button("🏠 Back to Home"):
-        st.switch_page("pages/home.py")
+        st.switch_page("pages/0_home.py")

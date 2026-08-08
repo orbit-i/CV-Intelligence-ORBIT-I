@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import hashlib
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'orbit-I'))
@@ -115,11 +116,31 @@ def get_position_title(domain):
 
 if uploaded_files:
     st.session_state.results = []
+    seen_hashes = set()
+    seen_emails = set()
 
     for file in uploaded_files:
         status = st.status(f"Processing {file.name}", expanded=True)
 
         try:
+            file_hash = hashlib.md5(file.getvalue()).hexdigest()
+
+            if file_hash in seen_hashes:
+                st.session_state.results.append({
+                    "Candidate": file.name,
+                    "Email": "",
+                    "Phone": "",
+                    "File": file.name,
+                    "Domain": "-",
+                    "Confidence (%)": "-",
+                    "Status": "🔁 Duplicate File",
+                    "Offer Path": ""
+                })
+                status.update(label=f"{file.name} — Duplicate File 🔁", state="error")
+                continue
+
+            seen_hashes.add(file_hash)
+
             text = extract_text(file)
             status.write("Text extracted successfully.")
 
@@ -131,6 +152,23 @@ if uploaded_files:
             candidate_email = extract_email(text)
             candidate_phone = extract_phone(text)
 
+            if candidate_email and candidate_email in seen_emails:
+                st.session_state.results.append({
+                    "Candidate": candidate_name,
+                    "Email": candidate_email,
+                    "Phone": candidate_phone,
+                    "File": file.name,
+                    "Domain": "-",
+                    "Confidence (%)": "-",
+                    "Status": "🔁 Duplicate Candidate",
+                    "Offer Path": ""
+                })
+                status.update(label=f"{file.name} — Duplicate Candidate 🔁", state="error")
+                continue
+
+            if candidate_email:
+                seen_emails.add(candidate_email)
+
             offer_path = None
 
             if confidence >= 75:
@@ -138,7 +176,7 @@ if uploaded_files:
                     "candidate_name": candidate_name,
                     "domain": predicted_domain,
                     "position_title": get_position_title(predicted_domain),
-                    "salary": "PKR 100,000 / month",
+                    "salary": "100,000",
                     "company_name": "ORBIT-I",
                     "hr_signatory": "HR Department",
                     "probation_period": "3 months",
