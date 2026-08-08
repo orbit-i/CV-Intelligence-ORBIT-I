@@ -22,8 +22,6 @@ def create_table():
         domain_name TEXT UNIQUE NOT NULL,
         keywords TEXT,
         required_skills TEXT,
-        salary_range TEXT,
-        seniority TEXT,
         offer_letter_template TEXT
     )
     """)
@@ -38,28 +36,28 @@ def get_all_domains():
     conn.close()
     return rows
 
-def add_domain(domain_name, keywords, required_skills, salary_range, seniority, template):
+def add_domain(domain_name, keywords, required_skills, template):
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute("""
-        INSERT INTO domains (domain_name, keywords, required_skills, salary_range, seniority, offer_letter_template)
-        VALUES (?, ?, ?, ?, ?, ?)
-        """, (domain_name, keywords, required_skills, salary_range, seniority, template))
+        INSERT INTO domains (domain_name, keywords, required_skills, offer_letter_template)
+        VALUES (?, ?, ?, ?)
+        """, (domain_name, keywords, required_skills, template))
         conn.commit()
         conn.close()
         return True, "Domain added successfully!"
     except Exception as e:
         return False, str(e)
 
-def update_domain(old_name, domain_name, keywords, required_skills, salary_range, seniority, template):
+def update_domain(old_name, domain_name, keywords, required_skills, template):
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute("""
-        UPDATE domains SET domain_name=?, keywords=?, required_skills=?, salary_range=?, seniority=?, offer_letter_template=?
+        UPDATE domains SET domain_name=?, keywords=?, required_skills=?, offer_letter_template=?
         WHERE domain_name=?
-        """, (domain_name, keywords, required_skills, salary_range, seniority, template, old_name))
+        """, (domain_name, keywords, required_skills, template, old_name))
         conn.commit()
         conn.close()
         return True, "Domain updated successfully!"
@@ -200,30 +198,22 @@ with left_col:
             ("#fee2e2", "#b91c1c"),
         ]
 
-        LEVEL_COLORS = {
-            "Junior": ("#dcfce7", "#15803d"),
-            "Mid": ("#dbeafe", "#1d4ed8"),
-            "Senior": ("#fce7f3", "#9d174d"),
-        }
-
         if domains:
             st.markdown(f"<p style='color:#64748b; font-size:13px;'>Showing 1 to {len(domains)} of {len(domains)} domains</p>", unsafe_allow_html=True)
 
             # Table header
-            th1, th2, th3, th4 = st.columns([3, 2, 1, 1])
+            # Table header
+            th1, th2, th3 = st.columns([4, 1, 1])
             with th1: st.markdown("<p style='font-size:11px; color:#94a3b8; font-weight:600; letter-spacing:1px;'>DOMAIN NAME</p>", unsafe_allow_html=True)
-            with th2: st.markdown("<p style='font-size:11px; color:#94a3b8; font-weight:600; letter-spacing:1px;'>LEVEL</p>", unsafe_allow_html=True)
-            with th3: st.markdown("<p style='font-size:11px; color:#94a3b8; font-weight:600; letter-spacing:1px;'>ACTIONS</p>", unsafe_allow_html=True)
-            with th4: st.markdown("", unsafe_allow_html=True)
+            with th2: st.markdown("<p style='font-size:11px; color:#94a3b8; font-weight:600; letter-spacing:1px;'>ACTIONS</p>", unsafe_allow_html=True)
+            with th3: st.markdown("", unsafe_allow_html=True)
 
             for i, domain in enumerate(domains):
-                did, dname, keywords, skills, salary, *rest = domain
-                seniority = rest[0] if rest else "Mid"
+                did, dname, keywords, skills, *rest = domain
                 bg, fg = COLORS[i % len(COLORS)]
                 initials = "".join([w[0].upper() for w in dname.split()[:2]])
-                lvl_bg, lvl_fg = LEVEL_COLORS.get(seniority, ("#e2e8f0", "#475569"))
 
-                c1, c2, c3, c4 = st.columns([3, 2, 1, 1])
+                c1, c2, c3 = st.columns([4, 1, 1])
                 with c1:
                     st.markdown(f"""
                         <div style='display:flex; align-items:center; gap:10px; padding:8px 0;'>
@@ -238,17 +228,9 @@ with left_col:
                         </div>
                     """, unsafe_allow_html=True)
                 with c2:
-                    st.markdown(f"""
-                        <div style='padding:8px 0;'>
-                            <span style='background:{lvl_bg}; color:{lvl_fg}; padding:3px 12px; border-radius:100px; font-size:12px; font-weight:600;'>
-                                {seniority or 'Mid'}
-                            </span>
-                        </div>
-                    """, unsafe_allow_html=True)
-                with c3:
                     if st.button("✏️", key=f"edit_{did}", help="Edit"):
                         st.session_state.edit_domain = domain
-                with c4:
+                with c3:
                     if st.button("🗑️", key=f"del_{did}", help="Delete"):
                         st.session_state.confirm_delete = dname
 
@@ -320,10 +302,7 @@ with right_col:
             "name": d[1],
             "keywords": d[2] or "",
             "skills": d[3] or "",
-            "salary_min": d[4].split("–")[0].strip() if d[4] and "–" in d[4] else "",
-            "salary_max": d[4].split("–")[1].strip() if d[4] and "–" in d[4] else "",
-            "seniority": d[5] if len(d) > 5 else "Mid",
-            "template": d[6] if len(d) > 6 else "",
+            "template": d[4] if len(d) > 4 else "",
         }
 
     domain_name = st.text_input("Domain Name *", value=prefill.get("name", ""), placeholder="Enter domain name")
@@ -332,15 +311,6 @@ with right_col:
 
     required_skills = st.text_input("Required Skills *", value=prefill.get("skills", ""), placeholder="Enter skills separated by comma")
     st.markdown("<p style='font-size:11px; color:#94a3b8; margin-top:-12px;'>Example: Wireframing, Prototyping, User Research</p>", unsafe_allow_html=True)
-
-    seniority = st.selectbox("Seniority Level *", ["Junior", "Mid", "Senior"],
-        index=["Junior", "Mid", "Senior"].index(prefill.get("seniority", "Mid")))
-
-    sc1, sc2 = st.columns([1, 1])
-    with sc1:
-        salary_min = st.text_input("Min Salary (PKR)", value=prefill.get("salary_min", ""), placeholder="Min Salary")
-    with sc2:
-        salary_max = st.text_input("Max Salary (PKR)", value=prefill.get("salary_max", ""), placeholder="Max Salary")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -356,11 +326,10 @@ with right_col:
             if not domain_name:
                 st.error("Domain name is required.")
             else:
-                salary_range = f"{salary_min} – {salary_max}" if salary_min and salary_max else salary_min or salary_max or ""
                 if is_editing and not is_new:
-                    ok, msg = update_domain(old_name, domain_name, keyword_tags, required_skills, salary_range, seniority, "")
+                    ok, msg = update_domain(old_name, domain_name, keyword_tags, required_skills, "")
                 else:
-                    ok, msg = add_domain(domain_name, keyword_tags, required_skills, salary_range, seniority, "")
+                    ok, msg = add_domain(domain_name, keyword_tags, required_skills, "")
                 if ok:
                     st.success(f"✅ {msg}")
                     st.session_state.edit_domain = None
