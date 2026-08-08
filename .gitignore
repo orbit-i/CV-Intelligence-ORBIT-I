@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database
+*.db
+
+# Generated offer letters
+ORBIT-I/data/output/*.docx
+orbit-I/data/output/*.docx
+
+# Test/generated CVs
+ORBIT-I/templates/*_test_cv.docx
+orbit-I/templates/*_test_cv.pdf
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
