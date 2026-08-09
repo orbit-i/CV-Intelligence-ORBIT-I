@@ -228,7 +228,7 @@ streamlit run app.py
 | **Prem Kumar** | Python Developer | Batch Processing Module, Multiple Resume Upload, Resume Processing & Classification |
 | **Umair Ahmed Bhutto** | Python Developer / AI Developer | Classifier Improvements, Domain Classification, Confidence Scoring, Preprocessing, Manual Override, Domain Management, Upload Improvements, Testing |
 | **Sohail Abbas** | Python Developer | Python development| remove extra options in domain manager
-
+| **Hasnain Mustafa** | Ai Engineer | pdf offer leeter ganeration and testing
 > Add your name and contributions before your first commit.
 
 > Add your name and contributions before your first commit.
