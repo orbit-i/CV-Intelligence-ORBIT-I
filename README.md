@@ -224,13 +224,6 @@ streamlit run app.py
 | **Musawir Hassan** | Project Lead | Project Architecture, Backend Development, AI Integration |
 | **Mahnoor** | Backend Developer Intern | Python |
 | **Kashif Lakho** | Python Developer | Backend Development |
-## 👨‍💻 Team Members
-
-| **Name** | **Role** | **Contributions** |
-|----------|----------|-------------------|
-| **Musawir Hassan** | Project Lead | Project Architecture, Backend Development, AI Integration |
-| **Mahnoor** | Backend Developer Intern | Python |
-| **Kashif Lakho** | Python Developer | Backend Development |
 | **Abdul Qayoom** | Python Developer | AI Engineering |
 | **Prem Kumar** | Python Developer | Batch Processing Module, Multiple Resume Upload, Resume Processing & Classification |
 | **Umair Ahmed Bhutto** | Python Developer / AI Developer | Classifier Improvements, Domain Classification, Confidence Scoring, Preprocessing, Manual Override, Domain Management, Upload Improvements, Testing |
