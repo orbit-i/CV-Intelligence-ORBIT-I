@@ -23,25 +23,12 @@ st.set_page_config(page_title="ORBIT-I | Batch Processing", page_icon="📄", la
 with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "style.css"), encoding="utf-8") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-col_title, col_top = st.columns([3, 2])
-with col_title:
-    st.markdown("""
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div class="stat-icon-circle">📄</div>
-            <div>
-                <h1 style="margin:0; padding:0; line-height:1.1;">Batch Processing Dashboard</h1>
-                <p style="margin:0; color: var(--lb-text-muted); font-size:14px;">Upload multiple CVs to process them together.</p>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-with col_top:
-    st.markdown("""
-        <div class="orbit-topbar">
-            <div class="orbit-search">🔍 <span>Search...</span></div>
-            <div class="orbit-icon-btn">🔔</div>
-            <div class="orbit-avatar">A</div>
-        </div>
-    """, unsafe_allow_html=True)
+st.markdown("""
+    <div>
+        <h1 style="margin:0; padding:0; line-height:1.1;">Batch Processing Dashboard</h1>
+        <p style="margin:0; color: var(--lb-text-muted); font-size:14px;">Upload multiple CVs to process them together.</p>
+    </div>
+""", unsafe_allow_html=True)
 
 st.divider()
 

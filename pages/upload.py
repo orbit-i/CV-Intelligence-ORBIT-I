@@ -118,25 +118,12 @@ for key, default in [
     if key not in st.session_state:
         st.session_state[key] = default
 
-col_title, col_top = st.columns([3, 2])
-with col_title:
-    st.markdown("""
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div class="stat-icon-circle">📂</div>
-            <div>
-                <h1 style="margin:0; padding:0; line-height:1.1;">Upload Resume</h1>
-                <p style="margin:0; color: var(--lb-text-muted); font-size:14px;">Upload candidate CVs in PDF or DOCX format for AI processing.</p>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-with col_top:
-    st.markdown("""
-        <div class="orbit-topbar">
-            <div class="orbit-search">🔍 <span>Search...</span></div>
-            <div class="orbit-icon-btn">🔔</div>
-            <div class="orbit-avatar">A</div>
-        </div>
-    """, unsafe_allow_html=True)
+st.markdown("""
+    <div>
+        <h1 style="margin:0; padding:0; line-height:1.1;">Upload Resume</h1>
+        <p style="margin:0; color: var(--lb-text-muted); font-size:14px;">Upload candidate CVs in PDF or DOCX format for AI processing.</p>
+    </div>
+""", unsafe_allow_html=True)
 
 st.divider()
 

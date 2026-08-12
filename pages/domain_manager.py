@@ -161,21 +161,10 @@ if "confirm_delete" not in st.session_state:
 if "tester_result" not in st.session_state:
     st.session_state.tester_result = None
 
-# ── Top bar ──
-col_top1, col_top2 = st.columns([3, 2])
-with col_top2:
-    st.markdown("""
-        <div class="orbit-topbar">
-            <div class="orbit-search">🔍 <span>Search...</span></div>
-            <div class="orbit-icon-btn">🔔</div>
-            <div class="orbit-avatar">A</div>
-        </div>
-    """, unsafe_allow_html=True)
-
 # ── Page Header ──
 col_title, col_btn = st.columns([3, 1])
 with col_title:
-    st.markdown("## 🌐 Domain & Template Manager")
+    st.markdown("## Domain & Template Manager")
     st.markdown("Manage hiring domains, templates, keywords and test AI classification.")
 with col_btn:
     st.markdown("<br>", unsafe_allow_html=True)

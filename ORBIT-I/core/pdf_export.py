@@ -54,7 +54,9 @@ def validate_offer_data(data: dict, required_fields: dict = None) -> tuple[bool,
 
 def generate_offer_pdf(data: dict, offer_number: str, today: str, joining: str, logo_path: str) -> BytesIO:
     """Builds a single offer letter as a PDF in memory and returns it as a BytesIO buffer.
-    `joining` may be "TBD" for batch-generated offers where a start date hasn't been set yet.
+    Mirrors the wording and layout of templates/offer_template.docx (the DOCX export)
+    so both formats produce a consistent letter. `joining` may be "TBD" for
+    batch-generated offers where a start date hasn't been set yet.
     """
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -70,101 +72,146 @@ def generate_offer_pdf(data: dict, offer_number: str, today: str, joining: str, 
     )
     company_style = ParagraphStyle(
         "Company", parent=styles["Normal"], fontName="Helvetica-Bold",
-        fontSize=16, textColor=HexColor("#1a3a6b")
+        fontSize=14, textColor=HexColor("#1a3a6b")
+    )
+    company_sub_style = ParagraphStyle(
+        "CompanySub", parent=styles["Normal"], fontName="Helvetica",
+        fontSize=8, textColor=HexColor("#64748b"), leading=11
     )
     meta_style = ParagraphStyle(
         "Meta", parent=styles["Normal"], fontName="Helvetica",
-        fontSize=9, textColor=HexColor("#64748b"), alignment=2
+        fontSize=9, textColor=HexColor("#64748b"), alignment=2, leading=13
+    )
+    section_style = ParagraphStyle(
+        "Section", parent=styles["Normal"], fontName="Helvetica-Bold",
+        fontSize=12, textColor=HexColor("#1a3a6b"), spaceBefore=6, spaceAfter=8
+    )
+    sign_style = ParagraphStyle(
+        "Sign", parent=styles["Normal"], fontName="Times-Roman",
+        fontSize=10, leading=15
     )
 
     story = []
 
-    # ── Header: logo + company name (left), offer no/date (right) ──
+    # ── Header: logo + company name/address (left), offer no/date (right) ──
     if logo_path and os.path.exists(logo_path):
-        logo = Image(logo_path, width=0.55 * inch, height=0.55 * inch)
+        logo = Image(logo_path, width=0.5 * inch, height=0.5 * inch)
     else:
         logo = Paragraph("", body_style)
 
     header_left = Table(
         [[logo, Paragraph(
-            "ORBIT-I<br/><font size=8 color='#64748b'>Building Ideas, Creating Impacts</font>",
+            "ORBIT-I<br/>"
+            "<font size=8 color='#64748b'>CV Intelligence &amp; Offer Automation Platform<br/>"
+            "Karachi, Sindh, Pakistan &nbsp;&middot;&nbsp; orbiti2026@gmail.com</font>",
             company_style
         )]],
-        colWidths=[0.6 * inch, 2.5 * inch]
+        colWidths=[0.55 * inch, 3.45 * inch]
     )
     header_left.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
     ]))
 
-    header_right = Paragraph(f"Offer No: {offer_number}<br/>Date: {today}", meta_style)
+    header_right = Paragraph(
+        f"Date: {today}<br/>Ref: {offer_number}", meta_style
+    )
 
-    header_table = Table([[header_left, header_right]], colWidths=[3.5 * inch, 2.5 * inch])
+    header_table = Table([[header_left, header_right]], colWidths=[4.0 * inch, 2.0 * inch])
     header_table.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE")]))
     story.append(header_table)
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 8))
     story.append(HRFlowable(width="100%", thickness=1.5, color=HexColor("#2E5AAC")))
     story.append(Spacer(1, 16))
 
-    # ── Body ──
+    # ── Body — same wording as the DOCX template ──
     candidate_name = data.get("name", "Candidate")
     position = data.get("position", "—")
     domain = data.get("domain", "—")
     salary = data.get("salary", "—")
+    location = data.get("location") or "Hybrid — Karachi, Pakistan"
+    probation_period = data.get("probation_period") or "3 months"
+    hr_signatory = data.get("hr_signatory") or "HR Department"
 
     story.append(Paragraph(f"Dear <b>{candidate_name}</b>,", body_style))
     story.append(Paragraph(
-        f"We are pleased to offer you the position of <b>{position}</b> at <b>ORBIT-I</b>. "
-        f"We were impressed with your qualifications and believe you will be a valuable "
-        f"addition to our team.", body_style
+        f"We are pleased to extend this formal offer of employment for the position of "
+        f"<b>{position}</b> within the <b>{domain}</b> department at <b>ORBIT-I</b>. "
+        f"We believe your skills and experience make you an excellent fit for our team.",
+        body_style
     ))
 
+    story.append(Paragraph("Employment Details", section_style))
+
     details = [
-        ["Position:", position],
-        ["Department:", domain],
-        ["Work Location:", "Hybrid — Karachi, Pakistan"],
-        ["Employment Type:", "Full Time"],
-        ["Start Date:", joining],
+        ["Position Title", position],
+        ["Department / Domain", domain],
+        ["Monthly Salary", f"PKR {salary}"],
+        ["Date of Joining", joining],
+        ["Work Location", location],
+        ["Probation Period", probation_period],
+        ["Reporting To", hr_signatory],
     ]
-    details_table = Table(details, colWidths=[1.8 * inch, 4.0 * inch])
+    details_table = Table(details, colWidths=[2.0 * inch, 3.8 * inch])
     details_table.setStyle(TableStyle([
         ("FONTNAME", (0, 0), (0, -1), "Times-Bold"),
         ("FONTNAME", (1, 0), (1, -1), "Times-Roman"),
-        ("FONTSIZE", (0, 0), (-1, -1), 11),
+        ("FONTSIZE", (0, 0), (-1, -1), 10.5),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("LINEBELOW", (0, 0), (-1, -1), 0.4, HexColor("#e2e8f0")),
     ]))
-    story.append(Spacer(1, 10))
     story.append(details_table)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 14))
 
     story.append(Paragraph(
-        f"Your monthly compensation will be <b>PKR {salary}</b>. Details of your "
-        f"compensation and other benefits are outlined in the accompanying terms.", body_style
+        f"This offer is subject to the successful completion of your probation period of "
+        f"<b>{probation_period}</b>, during which your performance will be evaluated against "
+        f"the key objectives of your role.", body_style
     ))
     story.append(Paragraph(
-        "Please review this offer letter carefully and confirm your acceptance within "
-        "<b>3 working days</b> of receipt.", body_style
+        "Please confirm your acceptance of this offer by signing and returning a copy of "
+        "this letter within three (3) working days of receipt. Failure to do so may result "
+        "in the offer being withdrawn.", body_style
     ))
-    story.append(Paragraph("We are excited about the possibility of you joining our team!", body_style))
-    story.append(Spacer(1, 20))
-    story.append(Paragraph("Sincerely,<br/><b>HR Department</b><br/>ORBIT-I Team", body_style))
+    story.append(Paragraph(
+        "We look forward to welcoming you to the team and are excited about the "
+        "contributions you will bring to ORBIT-I.", body_style
+    ))
+    story.append(Spacer(1, 24))
+
+    # ── Signature block (mirrors the DOCX acceptance table) ──
+    sign_table = Table(
+        [[
+            Paragraph(
+                f"Sincerely,<br/><br/>_______________________<br/>"
+                f"{hr_signatory}<br/>ORBIT-I<br/>Karachi, Sindh, Pakistan",
+                sign_style
+            ),
+            Paragraph(
+                f"Accepted by:<br/><br/>_______________________<br/>"
+                f"{candidate_name}<br/>Date: _______________",
+                sign_style
+            ),
+        ]],
+        colWidths=[2.9 * inch, 2.9 * inch]
+    )
+    sign_table.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP")]))
+    story.append(sign_table)
 
     # ── Footer ──
-    story.append(Spacer(1, 30))
+    story.append(Spacer(1, 26))
     story.append(HRFlowable(width="100%", thickness=0.5, color=HexColor("#e2e8f0")))
     story.append(Spacer(1, 6))
-    footer_table = Table(
-        [["orbiti2026@gmail.com", "Karachi, Sindh, Pakistan"]],
-        colWidths=[3.5 * inch, 2.5 * inch]
+    footer_style = ParagraphStyle(
+        "Footer", parent=styles["Normal"], fontName="Helvetica",
+        fontSize=7.5, textColor=HexColor("#94a3b8"), alignment=1
     )
-    footer_table.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 8),
-        ("TEXTCOLOR", (0, 0), (-1, -1), HexColor("#94a3b8")),
-        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-    ]))
-    story.append(footer_table)
+    story.append(Paragraph(
+        "ORBIT-I &nbsp;&middot;&nbsp; Karachi, Sindh, Pakistan &nbsp;&middot;&nbsp; "
+        "orbiti2026@gmail.com &nbsp;&middot;&nbsp; This document is confidential and "
+        "intended solely for the named recipient.", footer_style
+    ))
 
     doc.build(story)
     buffer.seek(0)

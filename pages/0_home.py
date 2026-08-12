@@ -1,9 +1,12 @@
 import streamlit as st
 import base64
+import os
 
 st.set_page_config(page_title="ORBIT-I | Home", page_icon="🚀", layout="wide")
 
-with open("assets/style.css", encoding="utf-8") as f:
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+with open(os.path.join(BASE_DIR, "assets", "style.css"), encoding="utf-8") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 st.markdown("""
@@ -30,31 +33,19 @@ if "processed" not in st.session_state:
 if "pending" not in st.session_state:
     st.session_state.pending = 0
 
-with open("assets/logo.png", "rb") as f:
+with open(os.path.join(BASE_DIR, "assets", "logo.png"), "rb") as f:
     logo_data = base64.b64encode(f.read()).decode()
 
-# ── Top bar: title on the left, search / notifications / avatar on the right ──
-col_title, col_top = st.columns([3, 2])
-
-with col_title:
-    st.markdown(f"""
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0px;">
-            <img src="data:image/png;base64,{logo_data}" width="45">
-            <div>
-                <h1 style="margin: 0; padding: 0; line-height:1.1;">ORBIT-I</h1>
-                <p style="margin:0; color: var(--lb-text-muted); font-size: 14px;">CV Intelligence &amp; Offer Automation Platform</p>
-            </div>
+# ── Title ──
+st.markdown(f"""
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 0px;">
+        <img src="data:image/png;base64,{logo_data}" width="45">
+        <div>
+            <h1 style="margin: 0; padding: 0; line-height:1.1;">ORBIT-I</h1>
+            <p style="margin:0; color: var(--lb-text-muted); font-size: 14px;">CV Intelligence &amp; Offer Automation Platform</p>
         </div>
-    """, unsafe_allow_html=True)
-
-with col_top:
-    st.markdown("""
-        <div class="orbit-topbar">
-            <div class="orbit-search">🔍 <span>Search...</span></div>
-            <div class="orbit-icon-btn">🔔</div>
-            <div class="orbit-avatar">A</div>
-        </div>
-    """, unsafe_allow_html=True)
+    </div>
+""", unsafe_allow_html=True)
 
 st.divider()
 
@@ -106,7 +97,7 @@ with st.container(border=True):
 
     _, mid, _ = st.columns([1, 1, 1])
     with mid:
-        if st.button("📂  Upload CV", use_container_width=True, type="primary"):
+        if st.button("Upload CV", use_container_width=True, type="primary"):
             st.switch_page("pages/upload.py")
 
     st.markdown(

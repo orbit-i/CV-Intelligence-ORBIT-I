@@ -49,12 +49,9 @@ with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 col_title, col_badge = st.columns([3, 2])
 with col_title:
     st.markdown("""
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div class="stat-icon-circle">✏️</div>
-            <div>
-                <h1 style="margin:0; padding:0; line-height:1.1;">Manual Override Panel</h1>
-                <p style="margin:0; color: var(--lb-text-muted); font-size:14px;">Review and edit AI extracted candidate details before generating the final offer letter.</p>
-            </div>
+        <div>
+            <h1 style="margin:0; padding:0; line-height:1.1;">Manual Override Panel</h1>
+            <p style="margin:0; color: var(--lb-text-muted); font-size:14px;">Review and edit AI extracted candidate details before generating the final offer letter.</p>
         </div>
     """, unsafe_allow_html=True)
 with col_badge:
