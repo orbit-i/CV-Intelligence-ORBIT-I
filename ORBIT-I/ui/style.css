@@ -11,14 +11,14 @@
 
 :root{
 
-    /* Primary (60%) */
-    --primary:#0A2540;
+    /* Primary (60%) - light blue */
+    --primary:#1E88E5;
 
     /* Secondary (30%) */
-    --secondary:#F8F9FA;
+    --secondary:#F0F6FF;
 
     /* Accent (10%) */
-    --accent:#3B82F6;
+    --accent:#42A5F5;
 
     /* Status Colors */
     --success:#22C55E;
@@ -27,21 +27,54 @@
     --info:#0EA5E9;
 
     /* Text */
-    --text-dark:#1F2937;
-    --text-light:#6B7280;
+    --text-dark:#1A2B3C;
+    --text-light:#5C7089;
 
     /* Borders */
-    --border:#E5E7EB;
+    --border:#D6E8FB;
 
     /* Card */
     --card:#FFFFFF;
 
     /* Shadow */
-    --shadow:0 4px 12px rgba(0,0,0,.08);
+    --shadow:0 4px 12px rgba(30,136,229,.12);
 
     /* Radius */
     --radius:12px;
 
+}
+
+/* ==========================================================
+   DARK THEME (Streamlit sets [data-theme="dark"] on the app root;
+   falls back to the OS/browser preference otherwise)
+   ========================================================== */
+[data-theme="dark"]{
+
+    --primary:#64B5F6;
+    --secondary:#0E1620;
+    --accent:#64B5F6;
+
+    --text-dark:#E7F1FB;
+    --text-light:#9FB3C8;
+
+    --border:#274158;
+    --card:#182635;
+
+    --shadow:0 4px 14px rgba(0,0,0,.4);
+
+}
+
+@media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+        --primary:#64B5F6;
+        --secondary:#0E1620;
+        --accent:#64B5F6;
+        --text-dark:#E7F1FB;
+        --text-light:#9FB3C8;
+        --border:#274158;
+        --card:#182635;
+        --shadow:0 4px 14px rgba(0,0,0,.4);
+    }
 }
 
 
@@ -305,7 +338,7 @@ hr{
 
 .hero {
 
-    background: linear-gradient(135deg, #0A2540, #163B65);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
 
     color: white;
 
@@ -335,7 +368,7 @@ hr{
 
 .kpi-card {
 
-    background: white;
+    background: var(--card);
 
     padding: 22px;
 
