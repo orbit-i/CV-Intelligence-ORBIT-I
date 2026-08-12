@@ -1,53 +1,176 @@
-/* Main background */
+/* ==========================================================
+   ORBIT-I - Light Blue Theme
+   Adapts automatically to Streamlit's Light / Dark mode
+   ========================================================== */
+
+/* ---- Light theme (default) ---- */
+:root,
 .stApp {
-    background-color: #f0f4f8;
+    --lb-primary: #1E88E5;        /* light blue accent */
+    --lb-primary-hover: #1565C0;
+    --lb-bg: #F0F6FF;             /* app background */
+    --lb-card-bg: #FFFFFF;
+    --lb-card-border: #D6E8FB;
+    --lb-text: #1A2B3C;
+    --lb-text-muted: #5C7089;
+    --lb-shadow: 0 2px 8px rgba(30, 136, 229, 0.12);
 }
 
-/* Title */
+/* ---- Dark theme overrides ----
+   Streamlit renders `[data-theme="dark"]` on the app container when the
+   user (or system) selects the dark mode option. */
+[data-theme="dark"],
+.stApp[data-theme="dark"] {
+    --lb-primary: #64B5F6;        /* lighter blue reads better on dark bg */
+    --lb-primary-hover: #90CAF9;
+    --lb-bg: #0E1620;
+    --lb-card-bg: #182635;
+    --lb-card-border: #274158;
+    --lb-text: #E7F1FB;
+    --lb-text-muted: #9FB3C8;
+    --lb-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* Fallback for contexts without the Streamlit theme attribute, based on
+   the operating system / browser preference. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --lb-primary: #64B5F6;
+        --lb-primary-hover: #90CAF9;
+        --lb-bg: #0E1620;
+        --lb-card-bg: #182635;
+        --lb-card-border: #274158;
+        --lb-text: #E7F1FB;
+        --lb-text-muted: #9FB3C8;
+        --lb-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    }
+}
+
+/* ==========================================================
+   MAIN BACKGROUND
+   ========================================================== */
+.stApp {
+    background-color: var(--lb-bg);
+    color: var(--lb-text);
+}
+
+/* ==========================================================
+   TITLES / HEADERS
+   ========================================================== */
 h1 {
-    color: #1a73e8;
+    color: var(--lb-primary);
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* Subheader */
 h2, h3 {
-    color: #2c3e50;
+    color: var(--lb-text);
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* Metric cards */
+p, span, label, .stMarkdown {
+    color: var(--lb-text);
+}
+
+/* ==========================================================
+   SIDEBAR
+   ========================================================== */
+section[data-testid="stSidebar"] {
+    background-color: var(--lb-card-bg);
+    border-right: 1px solid var(--lb-card-border);
+}
+
+/* ==========================================================
+   METRIC CARDS
+   ========================================================== */
 [data-testid="stMetric"] {
-    background-color: #ffffff;
-    border: 1px solid #d1e3ff;
+    background-color: var(--lb-card-bg);
+    border: 1px solid var(--lb-card-border);
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: var(--lb-shadow);
 }
 
-/* Upload box */
+[data-testid="stMetricLabel"],
+[data-testid="stMetricValue"] {
+    color: var(--lb-text);
+}
+
+/* ==========================================================
+   UPLOAD BOX
+   ========================================================== */
 [data-testid="stFileUploader"] {
-    background-color: #ffffff;
+    background-color: var(--lb-card-bg);
     border-radius: 12px;
     padding: 10px;
-    border: 2px dashed #1a73e8;
+    border: 2px dashed var(--lb-primary);
 }
 
-/* Success message */
+/* ==========================================================
+   ALERTS / MESSAGES
+   ========================================================== */
 [data-testid="stAlert"] {
     border-radius: 10px;
 }
 
-/* Button */
+/* ==========================================================
+   INPUTS
+   ========================================================== */
+.stTextInput input,
+.stTextArea textarea,
+.stNumberInput input,
+.stSelectbox div[data-baseweb="select"] {
+    background-color: var(--lb-card-bg);
+    color: var(--lb-text);
+    border-radius: 8px;
+    border: 1px solid var(--lb-card-border);
+}
+
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
 .stButton > button {
-    background-color: #1a73e8;
+    background-color: var(--lb-primary);
     color: white;
     border-radius: 8px;
     border: none;
     padding: 10px 24px;
     font-size: 16px;
+    transition: background-color .2s ease-in-out;
 }
 
 .stButton > button:hover {
-    background-color: #1558b0;
+    background-color: var(--lb-primary-hover);
     color: white;
+}
+
+/* ==========================================================
+   DATAFRAMES / TABLES
+   ========================================================== */
+[data-testid="stDataFrame"] {
+    background-color: var(--lb-card-bg);
+    border-radius: 10px;
+}
+
+/* ==========================================================
+   TABS / EXPANDERS
+   ========================================================== */
+.stTabs [data-baseweb="tab"] {
+    color: var(--lb-text-muted);
+}
+
+.stTabs [aria-selected="true"] {
+    color: var(--lb-primary);
+}
+
+[data-testid="stExpander"] {
+    background-color: var(--lb-card-bg);
+    border: 1px solid var(--lb-card-border);
+    border-radius: 10px;
+}
+
+/* ==========================================================
+   DIVIDERS
+   ========================================================== */
+hr {
+    border-color: var(--lb-card-border);
 }
