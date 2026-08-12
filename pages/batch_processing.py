@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import hashlib
+from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'orbit-I'))
@@ -15,6 +16,7 @@ import pandas as pd
 
 from classifier.domain_classifier import classify_resume
 from core.offer_generator import generate_offer
+from core.pdf_export import validate_offer_data, generate_offer_pdf, BATCH_REQUIRED_FIELDS
 
 st.set_page_config(page_title="ORBIT-I | Batch Processing", layout="wide")
 
@@ -43,6 +45,10 @@ if "pending" not in st.session_state:
 
 output_folder = os.path.join(BASE_DIR, "data", "output")
 os.makedirs(output_folder, exist_ok=True)
+
+
+def get_logo_path():
+    return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "logo.png")
 
 
 def extract_text(file):
@@ -273,12 +279,69 @@ if st.session_state.results:
             for offer_path in generated_offers:
                 zip_file.write(offer_path, os.path.basename(offer_path))
 
-        with open(zip_path, "rb") as f:
-            st.download_button(
-                label="⬇️ Download All Offer Letters (ZIP)",
-                data=f,
-                file_name="offer_letters.zip",
-                mime="application/zip"
-            )
+        dl_col1, dl_col2 = st.columns(2)
+
+        with dl_col1:
+            with open(zip_path, "rb") as f:
+                st.download_button(
+                    label="⬇️ Download All Offer Letters (DOCX ZIP)",
+                    data=f,
+                    file_name="offer_letters.zip",
+                    mime="application/zip",
+                    use_container_width=True
+                )
+
+        # ── PDF ZIP export ──
+        # Build a candidate data dict per generated offer, matching the field
+        # names generate_offer_pdf expects. Start Date isn't collected in the
+        # batch flow, so "TBD" is used and Start Date is excluded from validation
+        # (see BATCH_REQUIRED_FIELDS in core/pdf_export.py).
+        pdf_candidates = []
+        for r in st.session_state.results:
+            if r["Offer Path"] and os.path.exists(r["Offer Path"]):
+                pdf_data = {
+                    "name": r["Candidate"],
+                    "position": get_position_title(r["Domain"]),
+                    "domain": r["Domain"],
+                    "salary": "100,000",
+                    "joining_date": "TBD",
+                    "email": r["Email"],
+                }
+                is_valid, _missing = validate_offer_data(pdf_data, required_fields=BATCH_REQUIRED_FIELDS)
+                if is_valid:
+                    pdf_candidates.append(pdf_data)
+
+        skipped_count = len(generated_offers) - len(pdf_candidates)
+
+        with dl_col2:
+            if pdf_candidates:
+                pdf_zip_path = os.path.join(output_folder, "offer_letters_pdf.zip")
+                offer_number_base = f"ORB/{datetime.now().year}/{datetime.now().strftime('%m%d')}"
+                today = datetime.now().strftime("%d %B %Y")
+                logo_path = get_logo_path()
+
+                with zipfile.ZipFile(pdf_zip_path, "w") as pdf_zip:
+                    for idx, cd in enumerate(pdf_candidates, start=1):
+                        offer_number = f"{offer_number_base}-{idx:03d}"
+                        pdf_buffer = generate_offer_pdf(
+                            cd, offer_number, today, cd["joining_date"], logo_path=logo_path
+                        )
+                        safe_name = cd["name"].replace(" ", "_")
+                        pdf_zip.writestr(f"Offer_Letter_{safe_name}.pdf", pdf_buffer.getvalue())
+
+                with open(pdf_zip_path, "rb") as f:
+                    st.download_button(
+                        label="📕 Download All Offer Letters (PDF ZIP)",
+                        data=f,
+                        file_name="offer_letters_pdf.zip",
+                        mime="application/zip",
+                        use_container_width=True
+                    )
+            else:
+                st.button("📕 Download All Offer Letters (PDF ZIP)", use_container_width=True, disabled=True)
+
+        if skipped_count > 0:
+            st.caption(f"⚠️ {skipped_count} offer(s) skipped from PDF export due to missing required fields (name, position, department, salary, or email).")
+
     else:
         st.info("No offer letters generated yet — all CVs are pending manual review.")
