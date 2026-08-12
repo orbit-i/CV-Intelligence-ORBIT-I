@@ -55,6 +55,28 @@
 }
 
 /* ==========================================================
+   STREAMLIT'S BUILT-IN TOP HEADER BAR
+   By default this strip (which holds the Deploy button / menu) stays
+   transparent over a dark canvas, so it can look like a stray black
+   bar. Force it to match the app background in both themes.
+   ========================================================== */
+[data-testid="stHeader"] {
+    background-color: var(--lb-bg) !important;
+}
+
+[data-testid="stHeader"] * {
+    color: var(--lb-text) !important;
+}
+
+[data-testid="stHeader"] svg {
+    fill: var(--lb-text) !important;
+}
+
+[data-testid="stToolbar"] {
+    background-color: transparent !important;
+}
+
+/* ==========================================================
    TITLES / HEADERS
    ========================================================== */
 h1 {
@@ -178,11 +200,8 @@ hr {
 /* ==========================================================
    SIDEBAR NAVIGATION (icons + active state)
    li:nth-child(1) is the default "app" entry, hidden separately by each
-   page. What follows is alphabetical by filename:
-   2 Home | 3 Batch Processing | 4 Domain Manager | 5 Manual Override
-   6 Offer Preview | 7 Upload Resume
-   Domain Manager (4) and Offer Preview (6) are reached contextually
-   (via in-page buttons) rather than the sidebar, so they're hidden here.
+   page. All pages (Home, Batch Processing, Domain Manager, Manual
+   Override, Offer Preview, Upload Resume) stay visible in the sidebar.
    ========================================================== */
 [data-testid="stSidebarNav"] ul li:first-child {
     display: none;
@@ -196,11 +215,6 @@ hr {
     color: var(--lb-primary);
     padding: 24px 16px 16px 16px;
     letter-spacing: 1px;
-}
-
-[data-testid="stSidebarNav"] li:nth-child(4),
-[data-testid="stSidebarNav"] li:nth-child(6) {
-    display: none;
 }
 
 [data-testid="stSidebarNav"] ul li a {
@@ -228,7 +242,9 @@ hr {
 
 [data-testid="stSidebarNav"] ul li:nth-child(2) a span::before { content: "🏠  "; }
 [data-testid="stSidebarNav"] ul li:nth-child(3) a span::before { content: "🗂️  "; }
+[data-testid="stSidebarNav"] ul li:nth-child(4) a span::before { content: "🌐  "; }
 [data-testid="stSidebarNav"] ul li:nth-child(5) a span::before { content: "✏️  "; }
+[data-testid="stSidebarNav"] ul li:nth-child(6) a span::before { content: "📄  "; }
 [data-testid="stSidebarNav"] ul li:nth-child(7) a span::before { content: "⬆️  "; }
 
 /* ==========================================================
