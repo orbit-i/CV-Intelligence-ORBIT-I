@@ -43,8 +43,29 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("✏️ Manual Override Panel")
-st.write("Review and edit candidate information before generating offer letter")
+with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "style.css")) as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+col_title, col_badge = st.columns([3, 2])
+with col_title:
+    st.markdown("""
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="stat-icon-circle">✏️</div>
+            <div>
+                <h1 style="margin:0; padding:0; line-height:1.1;">Manual Override Panel</h1>
+                <p style="margin:0; color: var(--lb-text-muted); font-size:14px;">Review and edit AI extracted candidate details before generating the final offer letter.</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+with col_badge:
+    _confidence_for_badge = st.session_state.get("candidate_data", {}).get("confidence", 0) or 0
+    st.markdown(f"""
+        <div class="confidence-badge">
+            <div class="cb-title">AI Extraction Confidence</div>
+            <div class="cb-value">{_confidence_for_badge}% Accurate</div>
+            <div class="cb-sub">{"High Confidence" if _confidence_for_badge >= 75 else "Needs Review"}</div>
+        </div>
+    """, unsafe_allow_html=True)
 
 st.divider()
 
@@ -149,7 +170,9 @@ ORBIT-I
 # ==========================================================
 else:
 
-    st.subheader("📝 Candidate Information")
+  with st.container(border=True):
+    st.markdown("##### 👤 Candidate Information")
+    st.caption("Editable candidate details extracted by AI.")
 
     col1, col2 = st.columns(2)
 

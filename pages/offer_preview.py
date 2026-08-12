@@ -28,6 +28,9 @@ def get_logo_path():
 
 logo_base64 = get_logo_base64()
 
+with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "style.css")) as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
     [data-testid="stSidebarNav"] ul li:first-child {display: none;}
@@ -36,7 +39,7 @@ st.markdown("""
         display: block;
         font-size: 20px;
         font-weight: 700;
-        color: #1a3a6b;
+        color: var(--lb-primary, #1a3a6b);
         padding: 24px 16px 16px 16px;
         letter-spacing: 1px;
     }
@@ -46,18 +49,18 @@ st.markdown("""
         align-items: center;
         gap: 12px;
         padding: 10px 0;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--lb-card-border, #f1f5f9);
         font-size: 14px;
     }
 
     .summary-label {
-        color: #64748b;
+        color: var(--lb-text-muted, #64748b);
         width: 140px;
         flex-shrink: 0;
     }
 
     .summary-value {
-        color: #0f172a;
+        color: var(--lb-text, #0f172a);
         font-weight: 500;
     }
 
@@ -66,11 +69,11 @@ st.markdown("""
         align-items: center;
         gap: 12px;
         padding: 14px 16px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--lb-card-border, #e2e8f0);
         border-radius: 10px;
         margin-bottom: 10px;
         cursor: pointer;
-        background: white;
+        background: var(--lb-card-bg, white);
     }
 
     .action-icon { font-size: 20px; }
@@ -138,6 +141,17 @@ phone = data.get("phone", "—")
 remarks = data.get("remarks", "—")
 offer_path = st.session_state.get("offer_letter_path", "")
 generated_on = datetime.now().strftime("%d %b %Y %I:%M %p")
+
+# ── Top bar ──
+col_top1, col_top2 = st.columns([3, 2])
+with col_top2:
+    st.markdown("""
+        <div class="orbit-topbar">
+            <div class="orbit-search">🔍 <span>Search...</span></div>
+            <div class="orbit-icon-btn">🔔</div>
+            <div class="orbit-avatar">A</div>
+        </div>
+    """, unsafe_allow_html=True)
 
 # ── Header ──
 col_title, col_back = st.columns([3, 1])

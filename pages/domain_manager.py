@@ -77,6 +77,9 @@ create_table()
 st.set_page_config(page_title="ORBIT-I | Domain Manager", page_icon="🌐", layout="wide")
 
 # ── CSS ──
+with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "style.css")) as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
     [data-testid="stSidebarNav"] ul li:first-child {display: none;}
@@ -85,14 +88,14 @@ st.markdown("""
         display: block;
         font-size: 20px;
         font-weight: 700;
-        color: #1a3a6b;
+        color: var(--lb-primary, #1a3a6b);
         padding: 24px 16px 16px 16px;
         letter-spacing: 1px;
     }
 
     .domain-card {
-        background: white;
-        border: 1px solid #e2e8f0;
+        background: var(--lb-card-bg, white);
+        border: 1px solid var(--lb-card-border, #e2e8f0);
         border-radius: 12px;
         padding: 14px 16px;
         margin-bottom: 10px;
@@ -133,8 +136,8 @@ st.markdown("""
     }
 
     .section-card {
-        background: white;
-        border: 1px solid #e2e8f0;
+        background: var(--lb-card-bg, white);
+        border: 1px solid var(--lb-card-border, #e2e8f0);
         border-radius: 14px;
         padding: 24px;
         margin-bottom: 20px;
@@ -157,6 +160,17 @@ if "confirm_delete" not in st.session_state:
     st.session_state.confirm_delete = None
 if "tester_result" not in st.session_state:
     st.session_state.tester_result = None
+
+# ── Top bar ──
+col_top1, col_top2 = st.columns([3, 2])
+with col_top2:
+    st.markdown("""
+        <div class="orbit-topbar">
+            <div class="orbit-search">🔍 <span>Search...</span></div>
+            <div class="orbit-icon-btn">🔔</div>
+            <div class="orbit-avatar">A</div>
+        </div>
+    """, unsafe_allow_html=True)
 
 # ── Page Header ──
 col_title, col_btn = st.columns([3, 1])

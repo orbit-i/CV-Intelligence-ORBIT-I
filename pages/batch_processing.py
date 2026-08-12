@@ -18,18 +18,41 @@ from classifier.domain_classifier import classify_resume
 from core.offer_generator import generate_offer
 from core.pdf_export import validate_offer_data, generate_offer_pdf, BATCH_REQUIRED_FIELDS
 
-st.set_page_config(page_title="ORBIT-I | Batch Processing", layout="wide")
+st.set_page_config(page_title="ORBIT-I | Batch Processing", page_icon="📄", layout="wide")
 
-st.title("📄 Batch Processing Dashboard")
-st.write("Upload multiple CVs to process them together.")
+with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "style.css")) as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+col_title, col_top = st.columns([3, 2])
+with col_title:
+    st.markdown("""
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="stat-icon-circle">📄</div>
+            <div>
+                <h1 style="margin:0; padding:0; line-height:1.1;">Batch Processing Dashboard</h1>
+                <p style="margin:0; color: var(--lb-text-muted); font-size:14px;">Upload multiple CVs to process them together.</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+with col_top:
+    st.markdown("""
+        <div class="orbit-topbar">
+            <div class="orbit-search">🔍 <span>Search...</span></div>
+            <div class="orbit-icon-btn">🔔</div>
+            <div class="orbit-avatar">A</div>
+        </div>
+    """, unsafe_allow_html=True)
 
 st.divider()
 
-uploaded_files = st.file_uploader(
-    "Upload Resume Files",
-    type=["pdf", "docx"],
-    accept_multiple_files=True
-)
+with st.container(border=True):
+    st.markdown("##### Upload Resume Files")
+    uploaded_files = st.file_uploader(
+        "Drag & drop resume files here, or click Browse Files",
+        type=["pdf", "docx"],
+        accept_multiple_files=True
+    )
+    st.caption("Supports PDF, DOCX  •  Max file size: 200MB per file")
 
 if "results" not in st.session_state:
     st.session_state.results = []
@@ -233,7 +256,52 @@ if uploaded_files:
 
 if st.session_state.results:
     st.divider()
-    st.subheader("📊 Processing Summary")
+
+    total_count = len(st.session_state.results)
+    done_count = sum(1 for r in st.session_state.results if "Done" in r["Status"])
+    review_count = sum(1 for r in st.session_state.results if "Manual Review" in r["Status"])
+    failed_count = sum(1 for r in st.session_state.results if "Failed" in r["Status"] or "Duplicate" in r["Status"])
+    progress_pct = int(round((done_count / total_count) * 100)) if total_count else 0
+
+    st.markdown("##### Processing Progress")
+    st.progress(progress_pct / 100 if total_count else 0)
+    st.caption(f"{progress_pct}% processed")
+
+    st.markdown(f"""
+        <div class="stat-card-row">
+            <div class="stat-card">
+                <div class="stat-icon-circle">📄</div>
+                <div>
+                    <div class="stat-label">Total Uploaded</div>
+                    <div class="stat-value">{total_count}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-circle success">✅</div>
+                <div>
+                    <div class="stat-label">Processed</div>
+                    <div class="stat-value">{done_count}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-circle warning">⏳</div>
+                <div>
+                    <div class="stat-label">Pending / Review</div>
+                    <div class="stat-value">{review_count}</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-circle danger">✖️</div>
+                <div>
+                    <div class="stat-label">Failed</div>
+                    <div class="stat-value">{failed_count}</div>
+                </div>
+            </div>
+        </div>
+        <br>
+    """, unsafe_allow_html=True)
+
+    st.subheader("📊 Batch Status")
 
     display_df = pd.DataFrame(st.session_state.results)[
         ["Candidate", "Email", "Phone", "Domain", "Confidence (%)", "Status"]

@@ -102,7 +102,7 @@ st.markdown("""
             display: block;
             font-size: 20px;
             font-weight: 700;
-            color: #1a73e8;
+            color: var(--lb-primary, #1a73e8);
             padding: 24px 16px 16px 16px;
             letter-spacing: 1px;
         }
@@ -118,18 +118,54 @@ for key, default in [
     if key not in st.session_state:
         st.session_state[key] = default
 
-st.title("📂 Upload Resume")
-st.write("Upload your resume in PDF or DOCX format")
+col_title, col_top = st.columns([3, 2])
+with col_title:
+    st.markdown("""
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="stat-icon-circle">📂</div>
+            <div>
+                <h1 style="margin:0; padding:0; line-height:1.1;">Upload Resume</h1>
+                <p style="margin:0; color: var(--lb-text-muted); font-size:14px;">Upload candidate CVs in PDF or DOCX format for AI processing.</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+with col_top:
+    st.markdown("""
+        <div class="orbit-topbar">
+            <div class="orbit-search">🔍 <span>Search...</span></div>
+            <div class="orbit-icon-btn">🔔</div>
+            <div class="orbit-avatar">A</div>
+        </div>
+    """, unsafe_allow_html=True)
+
 st.divider()
 
-uploaded_file = st.file_uploader("Select your CV", type=["pdf", "docx"])
+uploaded_file = st.file_uploader(
+    "Drag & Drop your CV here — OR click Browse files",
+    type=["pdf", "docx"],
+)
+st.caption("Supported formats: PDF, DOCX  •  Max file size: 20 MB")
 
 if uploaded_file is not None:
 
-    if st.session_state.last_uploaded != uploaded_file.name:
+    is_new_file = st.session_state.last_uploaded != uploaded_file.name
+    if is_new_file:
         st.session_state.last_uploaded = uploaded_file.name
         st.session_state.total_uploaded += 1
         st.session_state.pending += 1
+
+    file_size_kb = len(uploaded_file.getvalue()) / 1024
+    file_size_label = f"{file_size_kb/1024:.1f} MB" if file_size_kb > 1024 else f"{file_size_kb:.0f} KB"
+    file_icon = "📕" if uploaded_file.name.lower().endswith(".pdf") else "📘"
+
+    st.markdown(f"""
+        <div class="file-row">
+            <span class="file-icon">{file_icon}</span>
+            <span class="file-name">{uploaded_file.name}</span>
+            <span class="file-size">{file_size_label}</span>
+            <span class="status-pill uploaded">Uploaded</span>
+        </div>
+    """, unsafe_allow_html=True)
 
     with st.spinner("Processing your CV, please wait..."):
 
@@ -224,6 +260,49 @@ if uploaded_file is not None:
         time.sleep(1)
 
     st.success(f"✅ File uploaded successfully: {uploaded_file.name}")
+
+    # ── AI Validation checklist ──
+    text_len = len(extracted_text.strip())
+    file_ext_valid = uploaded_file.name.lower().endswith((".pdf", ".docx"))
+    text_extracted_ok = text_len > 200
+    low_quality = 0 < text_len <= 200
+
+    with st.container(border=True):
+        st.markdown("##### AI Validation")
+
+        v_icon = "✅" if file_ext_valid else "❌"
+        st.markdown(f"""
+            <div class="validation-item">
+                <span class="v-icon">{v_icon}</span>
+                <div>
+                    <div class="v-title">File Format Valid</div>
+                    <div class="v-desc">{uploaded_file.name.split('.')[-1].upper()} format is supported</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        v_icon = "✅" if text_extracted_ok else "⚠️"
+        st.markdown(f"""
+            <div class="validation-item">
+                <span class="v-icon">{v_icon}</span>
+                <div>
+                    <div class="v-title">Text Extraction</div>
+                    <div class="v-desc">{"Content extracted successfully" if text_extracted_ok else "Little to no readable text found"}</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        if low_quality or not text_len:
+            st.markdown("""
+                <div class="validation-item">
+                    <span class="v-icon">⚠️</span>
+                    <div>
+                        <div class="v-title">Low Scan Quality</div>
+                        <div class="v-desc">Some sections may have low clarity — consider a text-based PDF or DOCX</div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+
     st.divider()
 
     if result:
