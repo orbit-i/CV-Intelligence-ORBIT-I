@@ -3,7 +3,7 @@ import base64
 
 st.set_page_config(page_title="ORBIT-I | Home", page_icon="🚀", layout="wide")
 
-with open("assets/style.css") as f:
+with open("assets/style.css", encoding="utf-8") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 st.markdown("""

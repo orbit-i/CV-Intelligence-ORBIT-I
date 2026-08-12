@@ -77,7 +77,7 @@ create_table()
 st.set_page_config(page_title="ORBIT-I | Domain Manager", page_icon="🌐", layout="wide")
 
 # ── CSS ──
-with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "style.css")) as f:
+with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "style.css"), encoding="utf-8") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 st.markdown("""
